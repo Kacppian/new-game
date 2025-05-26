@@ -261,20 +261,21 @@ function Player({ position, onPositionChange }) {
       onPositionChange(newPos);
     }
 
-    // IMPROVED CAMERA SYSTEM - Better angle for platform jumping
-    // Use a more top-down angled view for better depth perception
-    const cameraDistance = 18;
-    const cameraHeight = 12;
+    // TOP-DOWN CAMERA SYSTEM - Camera looks straight down at player
+    const cameraHeight = 25; // Height above player
     
-    // Position camera at an angle that shows depth better
+    // Position camera directly above the player
     camera.position.set(
-      newPos.x + cameraDistance * 0.7,  // Slight side offset
-      newPos.y + cameraHeight,          // Higher up for better view
-      newPos.z + cameraDistance * 0.7   // Slight back offset
+      newPos.x,                    // Same X as player
+      newPos.y + cameraHeight,     // High above player
+      newPos.z                     // Same Z as player
     );
     
-    // Look slightly ahead of the player for better visibility
+    // Look straight down at the player
     camera.lookAt(newPos.x, newPos.y, newPos.z);
+    
+    // Keep camera rotation locked to prevent tilting
+    camera.up.set(0, 0, -1); // This ensures "up" direction is consistent for top-down view
   });
 
   return (
@@ -284,59 +285,56 @@ function Player({ position, onPositionChange }) {
   );
 }
 
-// Grid helper component for better spatial awareness
-function GridHelper() {
+// Enhanced grid helper for top-down view
+function TopDownGridHelper() {
   return (
     <group>
-      {/* Ground grid lines */}
-      {Array.from({ length: 25 }, (_, i) => {
-        const pos = (i - 12) * 1;
+      {/* Major grid lines every 2 units */}
+      {Array.from({ length: 31 }, (_, i) => {
+        const pos = (i - 15) * 2;
         return (
           <group key={i}>
-            {/* Vertical lines */}
-            <Box position={[pos, 0.05, 0]} args={[0.02, 0.1, 24]}>
-              <meshStandardMaterial color="#666666" transparent opacity={0.3} />
+            {/* Vertical major lines */}
+            <Box position={[pos, 0.02, 0]} args={[0.05, 0.04, 30]}>
+              <meshStandardMaterial color="#444444" transparent opacity={0.4} />
             </Box>
-            {/* Horizontal lines */}
-            <Box position={[0, 0.05, pos]} args={[24, 0.1, 0.02]}>
-              <meshStandardMaterial color="#666666" transparent opacity={0.3} />
+            {/* Horizontal major lines */}
+            <Box position={[0, 0.02, pos]} args={[30, 0.04, 0.05]}>
+              <meshStandardMaterial color="#444444" transparent opacity={0.4} />
             </Box>
           </group>
         );
       })}
+      
+      {/* Minor grid lines every 1 unit */}
+      {Array.from({ length: 61 }, (_, i) => {
+        const pos = (i - 30) * 1;
+        if (pos % 2 !== 0) { // Only draw lines that aren't major grid lines
+          return (
+            <group key={`minor-${i}`}>
+              {/* Vertical minor lines */}
+              <Box position={[pos, 0.01, 0]} args={[0.02, 0.02, 30]}>
+                <meshStandardMaterial color="#666666" transparent opacity={0.2} />
+              </Box>
+              {/* Horizontal minor lines */}
+              <Box position={[0, 0.01, pos]} args={[30, 0.02, 0.02]}>
+                <meshStandardMaterial color="#666666" transparent opacity={0.2} />
+              </Box>
+            </group>
+          );
+        }
+        return null;
+      })}
+      
+      {/* Center crosshair */}
+      <Box position={[0, 0.03, 0]} args={[4, 0.06, 0.1]}>
+        <meshStandardMaterial color="#ff0000" transparent opacity={0.6} />
+      </Box>
+      <Box position={[0, 0.03, 0]} args={[0.1, 0.06, 4]}>
+        <meshStandardMaterial color="#ff0000" transparent opacity={0.6} />
+      </Box>
     </group>
   );
-}
-
-// Enhanced shadows for better depth perception
-function PlatformShadows() {
-  const shadows = [];
-  
-  // Add circular shadows under platforms to help with depth perception
-  const shadowPositions = [
-    // Floor 1 shadows
-    ...Array.from({ length: 8 }, (_, i) => {
-      const angle = (i / 8) * Math.PI * 2;
-      const x = Math.cos(angle) * 6;
-      const z = Math.sin(angle) * 6;
-      return [x, 0.05, z, 2.2];
-    }),
-    [0, 0.05, 0, 3.2], // Center platform shadow
-    
-    // Floor 2 shadows
-    [-5, 0.05, -5, 1.4], [0, 0.05, 0, 2.2], [5, 0.05, 5, 1.4],
-    [-6, 0.05, 6, 2.7], [6, 0.05, -2, 2.2],
-  ];
-  
-  shadowPositions.forEach(([x, y, z, size], i) => {
-    shadows.push(
-      <Cylinder key={`shadow-${i}`} position={[x, y, z]} args={[size, size, 0.01, 16]}>
-        <meshStandardMaterial color="#000000" transparent opacity={0.2} />
-      </Cylinder>
-    );
-  });
-  
-  return <group>{shadows}</group>;
 }
 
 // Dynamic background component
@@ -400,7 +398,7 @@ function SafetyBoundaries() {
   );
 }
 
-// Tower component with enhanced visual cues
+// Tower component with enhanced visual cues for top-down view
 function Tower() {
   const elements = [];
   
@@ -411,25 +409,25 @@ function Tower() {
     </Box>
   );
   
-  // Add visible boundary markers
+  // Add visible boundary markers with better visibility for top-down
   for (let i = -12; i <= 12; i += 6) {
     elements.push(
-      <Box key={`boundary-x-${i}`} position={[i, 0.5, 12]} args={[0.2, 1, 0.2]} castShadow>
+      <Box key={`boundary-x-${i}`} position={[i, 1, 12]} args={[0.3, 2, 0.3]} castShadow>
         <meshStandardMaterial color="#654321" />
       </Box>
     );
     elements.push(
-      <Box key={`boundary-x-neg-${i}`} position={[i, 0.5, -12]} args={[0.2, 1, 0.2]} castShadow>
+      <Box key={`boundary-x-neg-${i}`} position={[i, 1, -12]} args={[0.3, 2, 0.3]} castShadow>
         <meshStandardMaterial color="#654321" />
       </Box>
     );
     elements.push(
-      <Box key={`boundary-z-${i}`} position={[12, 0.5, i]} args={[0.2, 1, 0.2]} castShadow>
+      <Box key={`boundary-z-${i}`} position={[12, 1, i]} args={[0.3, 2, 0.3]} castShadow>
         <meshStandardMaterial color="#654321" />
       </Box>
     );
     elements.push(
-      <Box key={`boundary-z-neg-${i}`} position={[-12, 0.5, i]} args={[0.2, 1, 0.2]} castShadow>
+      <Box key={`boundary-z-neg-${i}`} position={[-12, 1, i]} args={[0.3, 2, 0.3]} castShadow>
         <meshStandardMaterial color="#654321" />
       </Box>
     );
@@ -649,16 +647,17 @@ function Tower() {
     </Box>
   );
   
-  // Add floor labels
+  // Add floor labels positioned for top-down view
   for (let i = 1; i <= 10; i++) {
     elements.push(
       <Text
         key={`label-${i}`}
-        position={[12, i * 8 + 2, 0]}
-        fontSize={1.2}
-        color="#333333"
+        position={[14, i * 8 + 2, 0]}
+        fontSize={1.5}
+        color="#000000"
         anchorX="center"
         anchorY="middle"
+        rotation={[-Math.PI/2, 0, 0]} // Rotate text to be readable from above
       >
         Floor {i}
       </Text>
@@ -677,12 +676,13 @@ function VictoryMessage({ playerY }) {
   return (
     <Text
       position={[0, 95, 0]}
-      fontSize={3}
+      fontSize={4}
       color="#ffd700"
       anchorX="center"
       anchorY="middle"
+      rotation={[-Math.PI/2, 0, 0]} // Rotate for top-down view
     >
-      🎉 VICTORY! 🎉{'\n'}Master of the Spacious Hell Tower!
+      🎉 VICTORY! 🎉{'\n'}Master of the Hell Tower!
     </Text>
   );
 }
@@ -694,33 +694,30 @@ function Game() {
   return (
     <Canvas
       style={{ height: '100vh' }}
-      camera={{ position: [15, 12, 15], fov: 50 }} // Better initial camera angle
+      camera={{ position: [0, 25, 0], fov: 60 }} // Start with top-down view
       shadows // Enable shadows for better depth perception
     >
       {/* Dynamic background based on player height */}
       <DynamicBackground playerY={playerPosition.y} />
       
-      {/* Enhanced lighting with shadows */}
-      <ambientLight intensity={0.4} color="#ffffff" />
+      {/* Enhanced lighting optimized for top-down view */}
+      <ambientLight intensity={0.5} color="#ffffff" />
       <directionalLight 
-        position={[30, 40, 20]} 
+        position={[0, 50, 0]} 
         intensity={1.5} 
         color="#ffffff" 
         castShadow
         shadow-mapSize-width={2048}
         shadow-mapSize-height={2048}
         shadow-camera-far={200}
-        shadow-camera-left={-50}
-        shadow-camera-right={50}
-        shadow-camera-top={50}
-        shadow-camera-bottom={-50}
+        shadow-camera-left={-20}
+        shadow-camera-right={20}
+        shadow-camera-top={20}
+        shadow-camera-bottom={-20}
       />
-      <pointLight position={[0, 40, 0]} intensity={0.8} color="#ffffff" />
-      <pointLight position={[0, 80, 0]} intensity={1.5} color="#ffd700" />
 
-      {/* Visual aids */}
-      <GridHelper />
-      <PlatformShadows />
+      {/* Visual aids optimized for top-down view */}
+      <TopDownGridHelper />
       
       {/* Safety boundaries */}
       <SafetyBoundaries />
@@ -774,7 +771,7 @@ function GameUI({ playerY }) {
         <div>SPACE - Jump</div>
         <div>Goal: Reach the Golden Platform!</div>
         <div style={{ marginTop: '10px', fontSize: '12px', color: '#666' }}>
-          Improved camera angle for better platforming!
+          Perfect top-down view for precise platforming!
         </div>
       </div>
     </div>
