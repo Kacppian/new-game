@@ -261,13 +261,20 @@ function Player({ position, onPositionChange }) {
       onPositionChange(newPos);
     }
 
-    // Update camera to follow player with more distance
+    // IMPROVED CAMERA SYSTEM - Better angle for platform jumping
+    // Use a more top-down angled view for better depth perception
+    const cameraDistance = 18;
+    const cameraHeight = 12;
+    
+    // Position camera at an angle that shows depth better
     camera.position.set(
-      newPos.x + 20,
-      newPos.y + 15,
-      newPos.z + 20
+      newPos.x + cameraDistance * 0.7,  // Slight side offset
+      newPos.y + cameraHeight,          // Higher up for better view
+      newPos.z + cameraDistance * 0.7   // Slight back offset
     );
-    camera.lookAt(newPos.x, newPos.y + 3, newPos.z);
+    
+    // Look slightly ahead of the player for better visibility
+    camera.lookAt(newPos.x, newPos.y, newPos.z);
   });
 
   return (
@@ -275,6 +282,61 @@ function Player({ position, onPositionChange }) {
       <meshStandardMaterial color="#4fc3f7" emissive="#0066cc" emissiveIntensity={0.3} />
     </Box>
   );
+}
+
+// Grid helper component for better spatial awareness
+function GridHelper() {
+  return (
+    <group>
+      {/* Ground grid lines */}
+      {Array.from({ length: 25 }, (_, i) => {
+        const pos = (i - 12) * 1;
+        return (
+          <group key={i}>
+            {/* Vertical lines */}
+            <Box position={[pos, 0.05, 0]} args={[0.02, 0.1, 24]}>
+              <meshStandardMaterial color="#666666" transparent opacity={0.3} />
+            </Box>
+            {/* Horizontal lines */}
+            <Box position={[0, 0.05, pos]} args={[24, 0.1, 0.02]}>
+              <meshStandardMaterial color="#666666" transparent opacity={0.3} />
+            </Box>
+          </group>
+        );
+      })}
+    </group>
+  );
+}
+
+// Enhanced shadows for better depth perception
+function PlatformShadows() {
+  const shadows = [];
+  
+  // Add circular shadows under platforms to help with depth perception
+  const shadowPositions = [
+    // Floor 1 shadows
+    ...Array.from({ length: 8 }, (_, i) => {
+      const angle = (i / 8) * Math.PI * 2;
+      const x = Math.cos(angle) * 6;
+      const z = Math.sin(angle) * 6;
+      return [x, 0.05, z, 2.2];
+    }),
+    [0, 0.05, 0, 3.2], // Center platform shadow
+    
+    // Floor 2 shadows
+    [-5, 0.05, -5, 1.4], [0, 0.05, 0, 2.2], [5, 0.05, 5, 1.4],
+    [-6, 0.05, 6, 2.7], [6, 0.05, -2, 2.2],
+  ];
+  
+  shadowPositions.forEach(([x, y, z, size], i) => {
+    shadows.push(
+      <Cylinder key={`shadow-${i}`} position={[x, y, z]} args={[size, size, 0.01, 16]}>
+        <meshStandardMaterial color="#000000" transparent opacity={0.2} />
+      </Cylinder>
+    );
+  });
+  
+  return <group>{shadows}</group>;
 }
 
 // Dynamic background component
@@ -338,13 +400,13 @@ function SafetyBoundaries() {
   );
 }
 
-// Tower component with much more spacious design
+// Tower component with enhanced visual cues
 function Tower() {
   const elements = [];
   
   // Ground (much larger with visible boundaries)
   elements.push(
-    <Box key="ground" position={[0, 0, 0]} args={[30, 0.2, 30]}>
+    <Box key="ground" position={[0, 0, 0]} args={[30, 0.2, 30]} receiveShadow>
       <meshStandardMaterial color="#8b4513" />
     </Box>
   );
@@ -352,22 +414,22 @@ function Tower() {
   // Add visible boundary markers
   for (let i = -12; i <= 12; i += 6) {
     elements.push(
-      <Box key={`boundary-x-${i}`} position={[i, 0.5, 12]} args={[0.2, 1, 0.2]}>
+      <Box key={`boundary-x-${i}`} position={[i, 0.5, 12]} args={[0.2, 1, 0.2]} castShadow>
         <meshStandardMaterial color="#654321" />
       </Box>
     );
     elements.push(
-      <Box key={`boundary-x-neg-${i}`} position={[i, 0.5, -12]} args={[0.2, 1, 0.2]}>
+      <Box key={`boundary-x-neg-${i}`} position={[i, 0.5, -12]} args={[0.2, 1, 0.2]} castShadow>
         <meshStandardMaterial color="#654321" />
       </Box>
     );
     elements.push(
-      <Box key={`boundary-z-${i}`} position={[12, 0.5, i]} args={[0.2, 1, 0.2]}>
+      <Box key={`boundary-z-${i}`} position={[12, 0.5, i]} args={[0.2, 1, 0.2]} castShadow>
         <meshStandardMaterial color="#654321" />
       </Box>
     );
     elements.push(
-      <Box key={`boundary-z-neg-${i}`} position={[-12, 0.5, i]} args={[0.2, 1, 0.2]}>
+      <Box key={`boundary-z-neg-${i}`} position={[-12, 0.5, i]} args={[0.2, 1, 0.2]} castShadow>
         <meshStandardMaterial color="#654321" />
       </Box>
     );
@@ -380,13 +442,13 @@ function Tower() {
     const x = Math.cos(angle) * 6;
     const z = Math.sin(angle) * 6;
     elements.push(
-      <Box key={`f1-${i}`} position={[x, floor1Y, z]} args={[2, 0.5, 2]}>
+      <Box key={`f1-${i}`} position={[x, floor1Y, z]} args={[2, 0.5, 2]} castShadow receiveShadow>
         <meshStandardMaterial color="#e6e6e6" />
       </Box>
     );
   }
   elements.push(
-    <Box key="f1-center" position={[0, floor1Y + 2, 0]} args={[3, 0.5, 3]}>
+    <Box key="f1-center" position={[0, floor1Y + 2, 0]} args={[3, 0.5, 3]} castShadow receiveShadow>
       <meshStandardMaterial color="#f0f0f0" />
     </Box>
   );
@@ -394,27 +456,27 @@ function Tower() {
   // Floor 2: Bouncing spheres and boxes (White zone - more spread out)
   const floor2Y = 16;
   elements.push(
-    <Sphere key="f2-sphere1" position={[-5, floor2Y, -5]} args={[1.2]}>
+    <Sphere key="f2-sphere1" position={[-5, floor2Y, -5]} args={[1.2]} castShadow receiveShadow>
       <meshStandardMaterial color="#f5f5f5" />
     </Sphere>
   );
   elements.push(
-    <Box key="f2-box1" position={[0, floor2Y + 1, 0]} args={[2, 2, 2]}>
+    <Box key="f2-box1" position={[0, floor2Y + 1, 0]} args={[2, 2, 2]} castShadow receiveShadow>
       <meshStandardMaterial color="#ffffff" />
     </Box>
   );
   elements.push(
-    <Sphere key="f2-sphere2" position={[5, floor2Y + 0.5, 5]} args={[1.2]}>
+    <Sphere key="f2-sphere2" position={[5, floor2Y + 0.5, 5]} args={[1.2]} castShadow receiveShadow>
       <meshStandardMaterial color="#f8f8f8" />
     </Sphere>
   );
   elements.push(
-    <Box key="f2-box2" position={[-6, floor2Y + 2, 6]} args={[2.5, 0.5, 2.5]}>
+    <Box key="f2-box2" position={[-6, floor2Y + 2, 6]} args={[2.5, 0.5, 2.5]} castShadow receiveShadow>
       <meshStandardMaterial color="#e0e0e0" />
     </Box>
   );
   elements.push(
-    <Box key="f2-box3" position={[6, floor2Y + 3, -2]} args={[2, 0.5, 3]}>
+    <Box key="f2-box3" position={[6, floor2Y + 3, -2]} args={[2, 0.5, 3]} castShadow receiveShadow>
       <meshStandardMaterial color="#f0f0f0" />
     </Box>
   );
@@ -423,18 +485,18 @@ function Tower() {
   const floor3Y = 24;
   for (let i = 0; i < 6; i++) {
     elements.push(
-      <Box key={`f3-left-${i}`} position={[-4, floor3Y + i * 1.2, 0]} args={[0.5, 0.5, 3]}>
+      <Box key={`f3-left-${i}`} position={[-4, floor3Y + i * 1.2, 0]} args={[0.5, 0.5, 3]} castShadow receiveShadow>
         <meshStandardMaterial color={`hsl(240, 100%, ${70 + i * 3}%)`} />
       </Box>
     );
     elements.push(
-      <Box key={`f3-right-${i}`} position={[4, floor3Y + i * 1.2, 0]} args={[0.5, 0.5, 3]}>
+      <Box key={`f3-right-${i}`} position={[4, floor3Y + i * 1.2, 0]} args={[0.5, 0.5, 3]} castShadow receiveShadow>
         <meshStandardMaterial color={`hsl(240, 100%, ${70 + i * 3}%)`} />
       </Box>
     );
   }
   elements.push(
-    <Box key="f3-top" position={[0, floor3Y + 6, 0]} args={[6, 0.5, 2]}>
+    <Box key="f3-top" position={[0, floor3Y + 6, 0]} args={[6, 0.5, 2]} castShadow receiveShadow>
       <meshStandardMaterial color="#4682b4" />
     </Box>
   );
@@ -448,7 +510,7 @@ function Tower() {
     const z = Math.sin(angle) * radius;
     const y = floor4Y + (i * 0.5);
     elements.push(
-      <Box key={`f4-${i}`} position={[x, y, z]} args={[1.5, 0.3, 1.5]}>
+      <Box key={`f4-${i}`} position={[x, y, z]} args={[1.5, 0.3, 1.5]} castShadow receiveShadow>
         <meshStandardMaterial color={`hsl(${220 + i * 3}, 80%, 65%)`} />
       </Box>
     );
@@ -466,13 +528,13 @@ function Tower() {
   platforms.forEach((platform, i) => {
     if (platform.type === 'sphere') {
       elements.push(
-        <Sphere key={`f5-${i}`} position={platform.pos} args={platform.size}>
+        <Sphere key={`f5-${i}`} position={platform.pos} args={platform.size} castShadow receiveShadow>
           <meshStandardMaterial color="#ff6b6b" />
         </Sphere>
       );
     } else {
       elements.push(
-        <Box key={`f5-${i}`} position={platform.pos} args={platform.size}>
+        <Box key={`f5-${i}`} position={platform.pos} args={platform.size} castShadow receiveShadow>
           <meshStandardMaterial color={`hsl(${0 + i * 10}, 80%, 65%)`} />
         </Box>
       );
@@ -487,7 +549,7 @@ function Tower() {
   ];
   zigzagPoints.forEach(([x, yOffset, z], i) => {
     elements.push(
-      <Box key={`f6-${i}`} position={[x, floor6Y + yOffset, z]} args={[2, 0.5, 2]}>
+      <Box key={`f6-${i}`} position={[x, floor6Y + yOffset, z]} args={[2, 0.5, 2]} castShadow receiveShadow>
         <meshStandardMaterial color={`hsl(${350 + i * 5}, 80%, 60%)`} />
       </Box>
     );
@@ -496,22 +558,22 @@ function Tower() {
   // Floor 7: Column climbing (Red zone)
   const floor7Y = 56;
   elements.push(
-    <Cylinder key="f7-col1" position={[-4, floor7Y + 2, -4]} args={[0.8, 0.8, 4]}>
+    <Cylinder key="f7-col1" position={[-4, floor7Y + 2, -4]} args={[0.8, 0.8, 4]} castShadow receiveShadow>
       <meshStandardMaterial color="#dc143c" />
     </Cylinder>
   );
   elements.push(
-    <Cylinder key="f7-col2" position={[4, floor7Y + 4, 4]} args={[0.8, 0.8, 8]}>
+    <Cylinder key="f7-col2" position={[4, floor7Y + 4, 4]} args={[0.8, 0.8, 8]} castShadow receiveShadow>
       <meshStandardMaterial color="#b22222" />
     </Cylinder>
   );
   elements.push(
-    <Cylinder key="f7-col3" position={[0, floor7Y + 6, 0]} args={[0.8, 0.8, 12]}>
+    <Cylinder key="f7-col3" position={[0, floor7Y + 6, 0]} args={[0.8, 0.8, 12]} castShadow receiveShadow>
       <meshStandardMaterial color="#8b0000" />
     </Cylinder>
   );
   elements.push(
-    <Box key="f7-top" position={[0, floor7Y + 12, 0]} args={[5, 0.5, 5]}>
+    <Box key="f7-top" position={[0, floor7Y + 12, 0]} args={[5, 0.5, 5]} castShadow receiveShadow>
       <meshStandardMaterial color="#ff4500" />
     </Box>
   );
@@ -523,13 +585,13 @@ function Tower() {
     const x = Math.cos(angle) * 5;
     const z = Math.sin(angle) * 5;
     elements.push(
-      <Sphere key={`f8-${i}`} position={[x, floor8Y + 2 + i * 0.5, z]} args={[1]}>
+      <Sphere key={`f8-${i}`} position={[x, floor8Y + 2 + i * 0.5, z]} args={[1]} castShadow receiveShadow>
         <meshStandardMaterial color={`hsl(${120 + i * 8}, 80%, 65%)`} />
       </Sphere>
     );
   }
   elements.push(
-    <Box key="f8-center" position={[0, floor8Y + 6, 0]} args={[3, 0.5, 3]}>
+    <Box key="f8-center" position={[0, floor8Y + 6, 0]} args={[3, 0.5, 3]} castShadow receiveShadow>
       <meshStandardMaterial color="#228b22" />
     </Box>
   );
@@ -537,27 +599,27 @@ function Tower() {
   // Floor 9: Mixed obstacles (Green zone)
   const floor9Y = 72;
   elements.push(
-    <Box key="f9-1" position={[-6, floor9Y, 0]} args={[1.5, 3, 1.5]}>
+    <Box key="f9-1" position={[-6, floor9Y, 0]} args={[1.5, 3, 1.5]} castShadow receiveShadow>
       <meshStandardMaterial color="#32cd32" />
     </Box>
   );
   elements.push(
-    <Sphere key="f9-2" position={[-2, floor9Y + 2, -4]} args={[1.2]}>
+    <Sphere key="f9-2" position={[-2, floor9Y + 2, -4]} args={[1.2]} castShadow receiveShadow>
       <meshStandardMaterial color="#90ee90" />
     </Sphere>
   );
   elements.push(
-    <Box key="f9-3" position={[2, floor9Y + 1, 2]} args={[2, 2, 2]}>
+    <Box key="f9-3" position={[2, floor9Y + 1, 2]} args={[2, 2, 2]} castShadow receiveShadow>
       <meshStandardMaterial color="#00ff00" />
     </Box>
   );
   elements.push(
-    <Cylinder key="f9-4" position={[6, floor9Y + 2, -2]} args={[0.8, 0.8, 4]}>
+    <Cylinder key="f9-4" position={[6, floor9Y + 2, -2]} args={[0.8, 0.8, 4]} castShadow receiveShadow>
       <meshStandardMaterial color="#006400" />
     </Cylinder>
   );
   elements.push(
-    <Box key="f9-top" position={[0, floor9Y + 5, 0]} args={[4, 0.5, 4]}>
+    <Box key="f9-top" position={[0, floor9Y + 5, 0]} args={[4, 0.5, 4]} castShadow receiveShadow>
       <meshStandardMaterial color="#adff2f" />
     </Box>
   );
@@ -570,7 +632,7 @@ function Tower() {
   ];
   beamPositions.forEach((pos, i) => {
     elements.push(
-      <Box key={`f10-${i}`} position={pos} args={[1, 0.5, 1]}>
+      <Box key={`f10-${i}`} position={pos} args={[1, 0.5, 1]} castShadow receiveShadow>
         <meshStandardMaterial color={`hsl(${0}, 0%, ${90 - i * 5}%)`} />
       </Box>
     );
@@ -578,7 +640,7 @@ function Tower() {
   
   // Victory platform (Golden white)
   elements.push(
-    <Box key="victory" position={[0, floor10Y + 8, 0]} args={[5, 1, 5]}>
+    <Box key="victory" position={[0, floor10Y + 8, 0]} args={[5, 1, 5]} castShadow receiveShadow>
       <meshStandardMaterial 
         color="#fffacd" 
         emissive="#ffd700" 
@@ -632,17 +694,34 @@ function Game() {
   return (
     <Canvas
       style={{ height: '100vh' }}
-      camera={{ position: [20, 15, 20], fov: 65 }}
+      camera={{ position: [15, 12, 15], fov: 50 }} // Better initial camera angle
+      shadows // Enable shadows for better depth perception
     >
       {/* Dynamic background based on player height */}
       <DynamicBackground playerY={playerPosition.y} />
       
-      {/* Enhanced lighting for different zones */}
-      <ambientLight intensity={0.6} color="#ffffff" />
-      <directionalLight position={[30, 40, 20]} intensity={1.2} color="#ffffff" />
-      <pointLight position={[0, 40, 0]} intensity={1} color="#ffffff" />
+      {/* Enhanced lighting with shadows */}
+      <ambientLight intensity={0.4} color="#ffffff" />
+      <directionalLight 
+        position={[30, 40, 20]} 
+        intensity={1.5} 
+        color="#ffffff" 
+        castShadow
+        shadow-mapSize-width={2048}
+        shadow-mapSize-height={2048}
+        shadow-camera-far={200}
+        shadow-camera-left={-50}
+        shadow-camera-right={50}
+        shadow-camera-top={50}
+        shadow-camera-bottom={-50}
+      />
+      <pointLight position={[0, 40, 0]} intensity={0.8} color="#ffffff" />
       <pointLight position={[0, 80, 0]} intensity={1.5} color="#ffd700" />
 
+      {/* Visual aids */}
+      <GridHelper />
+      <PlatformShadows />
+      
       {/* Safety boundaries */}
       <SafetyBoundaries />
 
@@ -651,8 +730,8 @@ function Game() {
       <Player position={[0, 1, 0]} onPositionChange={setPlayerPosition} />
       <VictoryMessage playerY={playerPosition.y} />
 
-      {/* Much larger ground */}
-      <Plane position={[0, 0, 0]} rotation={[-Math.PI / 2, 0, 0]} args={[60, 60]}>
+      {/* Much larger ground with shadows */}
+      <Plane position={[0, 0, 0]} rotation={[-Math.PI / 2, 0, 0]} args={[60, 60]} receiveShadow>
         <meshStandardMaterial color="#8b7355" />
       </Plane>
 
@@ -695,7 +774,7 @@ function GameUI({ playerY }) {
         <div>SPACE - Jump</div>
         <div>Goal: Reach the Golden Platform!</div>
         <div style={{ marginTop: '10px', fontSize: '12px', color: '#666' }}>
-          Enhanced jumping & safe boundaries!
+          Improved camera angle for better platforming!
         </div>
       </div>
     </div>
