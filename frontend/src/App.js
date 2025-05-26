@@ -32,35 +32,106 @@ function Player({ position, onPositionChange }) {
     };
   }, []);
 
-  // Define platform configurations
-  const platformConfigs = [
-    // Ground level
-    { type: 'box', size: [8, 0.2, 8], color: '#8b4513' },
-    // Level 1-5: Basic shapes with vibrant colors
-    { type: 'box', size: [6, 0.2, 6], color: '#ff0080' },
-    { type: 'cylinder', size: [5, 0.2, 16], color: '#00ff80' },
-    { type: 'box', size: [7, 0.2, 3], color: '#8000ff' },
-    { type: 'cross', size: [4, 0.2, 4], color: '#ff8000' },
-    { type: 'cylinder', size: [4, 0.2, 16], color: '#0080ff' },
-    // Level 6-10: More challenging shapes
-    { type: 'L-shape', size: [5, 0.2, 3], color: '#ff0040' },
-    { type: 'triangle', size: [5, 0.2, 5], color: '#40ff00' },
-    { type: 'box', size: [3, 0.2, 7], color: '#ff4080' },
-    { type: 'cylinder', size: [3.5, 0.2, 16], color: '#8040ff' },
-    { type: 'diamond', size: [4, 0.2, 4], color: '#ff8040' },
-    // Level 11-15: Advanced shapes
-    { type: 'star', size: [4, 0.2, 4], color: '#40ffff' },
-    { type: 'box', size: [2.5, 0.2, 5], color: '#ff4040' },
-    { type: 'hexagon', size: [3.5, 0.2, 3.5], color: '#80ff40' },
-    { type: 'T-shape', size: [4, 0.2, 3], color: '#4080ff' },
-    { type: 'cylinder', size: [2.5, 0.2, 16], color: '#ff80ff' },
-    // Level 16-20: Very challenging
-    { type: 'thin-box', size: [1.5, 0.2, 4], color: '#ffff00' },
-    { type: 'small-cross', size: [2.5, 0.2, 2.5], color: '#ff0000' },
-    { type: 'cylinder', size: [2, 0.2, 16], color: '#00ffff' },
-    { type: 'tiny-box', size: [2, 0.2, 2], color: '#ff00ff' },
-    { type: 'final-platform', size: [3, 0.2, 3], color: '#ffd700' }
-  ];
+  // Define all climbable elements for collision detection
+  const getClimbableElements = () => {
+    const elements = [];
+    
+    // Ground
+    elements.push({ type: 'box', pos: [0, 0, 0], size: [12, 0.2, 12] });
+    
+    // Floor 1: Stepping stones in a circle
+    const floor1Y = 4;
+    for (let i = 0; i < 8; i++) {
+      const angle = (i / 8) * Math.PI * 2;
+      const x = Math.cos(angle) * 3;
+      const z = Math.sin(angle) * 3;
+      elements.push({ type: 'box', pos: [x, floor1Y, z], size: [1.2, 0.3, 1.2] });
+    }
+    // Center platform
+    elements.push({ type: 'box', pos: [0, floor1Y + 1, 0], size: [2, 0.3, 2] });
+    
+    // Floor 2: Bouncing spheres and boxes
+    const floor2Y = 8;
+    elements.push({ type: 'sphere', pos: [-2, floor2Y, -2], size: [0.8] });
+    elements.push({ type: 'box', pos: [0, floor2Y + 0.5, 0], size: [1, 1, 1] });
+    elements.push({ type: 'sphere', pos: [2, floor2Y + 0.3, 2], size: [0.8] });
+    elements.push({ type: 'box', pos: [-3, floor2Y + 1, 3], size: [1.5, 0.3, 1.5] });
+    elements.push({ type: 'box', pos: [3, floor2Y + 1.5, -1], size: [1, 0.3, 2] });
+    
+    // Floor 3: Ladder-like vertical elements
+    const floor3Y = 12;
+    for (let i = 0; i < 5; i++) {
+      elements.push({ type: 'box', pos: [-2, floor3Y + i * 0.7, 0], size: [0.3, 0.3, 2] });
+      elements.push({ type: 'box', pos: [2, floor3Y + i * 0.7, 0], size: [0.3, 0.3, 2] });
+    }
+    elements.push({ type: 'box', pos: [0, floor3Y + 3, 0], size: [3, 0.3, 1] });
+    
+    // Floor 4: Spiral staircase
+    const floor4Y = 16;
+    for (let i = 0; i < 12; i++) {
+      const angle = (i / 12) * Math.PI * 2;
+      const radius = 2.5;
+      const x = Math.cos(angle) * radius;
+      const z = Math.sin(angle) * radius;
+      const y = floor4Y + (i * 0.3);
+      elements.push({ type: 'box', pos: [x, y, z], size: [0.8, 0.2, 0.8] });
+    }
+    
+    // Floor 5: Floating platforms
+    const floor5Y = 20;
+    elements.push({ type: 'box', pos: [-3, floor5Y, -3], size: [1.5, 0.3, 1.5] });
+    elements.push({ type: 'sphere', pos: [0, floor5Y + 0.5, 0], size: [1] });
+    elements.push({ type: 'box', pos: [3, floor5Y + 1, 3], size: [1.5, 0.3, 1.5] });
+    elements.push({ type: 'box', pos: [-2, floor5Y + 1.5, 2], size: [1, 0.3, 1] });
+    elements.push({ type: 'box', pos: [1, floor5Y + 2, -2], size: [1, 0.3, 1] });
+    
+    // Floor 6: Zigzag pattern
+    const floor6Y = 24;
+    const zigzagPoints = [
+      [-4, 0, -4], [-2, 0.5, -2], [0, 1, 0], [2, 1.5, 2], [4, 2, 4],
+      [3, 2.5, -3], [1, 3, -1], [-1, 3.5, 1], [-3, 4, 3]
+    ];
+    zigzagPoints.forEach(([x, yOffset, z]) => {
+      elements.push({ type: 'box', pos: [x, floor6Y + yOffset, z], size: [1, 0.3, 1] });
+    });
+    
+    // Floor 7: Column climbing
+    const floor7Y = 28;
+    elements.push({ type: 'cylinder', pos: [-2, floor7Y + 1, -2], size: [0.5, 2, 16] });
+    elements.push({ type: 'cylinder', pos: [2, floor7Y + 2, 2], size: [0.5, 4, 16] });
+    elements.push({ type: 'cylinder', pos: [0, floor7Y + 3, 0], size: [0.5, 6, 16] });
+    elements.push({ type: 'box', pos: [0, floor7Y + 6, 0], size: [3, 0.3, 3] });
+    
+    // Floor 8: Sphere jumping
+    const floor8Y = 32;
+    for (let i = 0; i < 6; i++) {
+      const angle = (i / 6) * Math.PI * 2;
+      const x = Math.cos(angle) * 2.5;
+      const z = Math.sin(angle) * 2.5;
+      elements.push({ type: 'sphere', pos: [x, floor8Y + 1 + i * 0.3, z], size: [0.6] });
+    }
+    elements.push({ type: 'box', pos: [0, floor8Y + 3, 0], size: [2, 0.3, 2] });
+    
+    // Floor 9: Mixed obstacles
+    const floor9Y = 36;
+    elements.push({ type: 'box', pos: [-3, floor9Y, 0], size: [0.8, 1.5, 0.8] });
+    elements.push({ type: 'sphere', pos: [-1, floor9Y + 1, -2], size: [0.7] });
+    elements.push({ type: 'box', pos: [1, floor9Y + 0.5, 1], size: [1, 1, 1] });
+    elements.push({ type: 'cylinder', pos: [3, floor9Y + 1, -1], size: [0.4, 2, 16] });
+    elements.push({ type: 'box', pos: [0, floor9Y + 2.5, 0], size: [2.5, 0.3, 2.5] });
+    
+    // Floor 10: Final challenge - narrow beam walk
+    const floor10Y = 40;
+    elements.push({ type: 'box', pos: [-4, floor10Y, 0], size: [0.5, 0.3, 0.5] });
+    elements.push({ type: 'box', pos: [-2, floor10Y + 0.5, 0], size: [0.5, 0.3, 0.5] });
+    elements.push({ type: 'box', pos: [0, floor10Y + 1, 0], size: [0.5, 0.3, 0.5] });
+    elements.push({ type: 'box', pos: [2, floor10Y + 1.5, 0], size: [0.5, 0.3, 0.5] });
+    elements.push({ type: 'box', pos: [4, floor10Y + 2, 0], size: [0.5, 0.3, 0.5] });
+    // Victory platform
+    elements.push({ type: 'box', pos: [0, floor10Y + 4, 0], size: [3, 0.5, 3] });
+    
+    return elements;
+  };
 
   // Physics and movement
   useFrame((state, delta) => {
@@ -107,94 +178,45 @@ function Player({ position, onPositionChange }) {
       z: currentPos.z + newVelocity.z * delta
     };
 
-    // Collision detection with different platform shapes
+    // Collision detection with all elements
     let onPlatform = false;
+    const elements = getClimbableElements();
     
-    for (let i = 0; i < platformConfigs.length; i++) {
-      const platformY = i * 4;
-      const config = platformConfigs[i];
+    for (const element of elements) {
+      const [ex, ey, ez] = element.pos;
       
-      if (newPos.y <= platformY + 0.6 && newPos.y >= platformY - 0.5 && velocity.y <= 0) {
-        let isOnThisPlatform = false;
+      if (newPos.y <= ey + element.size[1]/2 + 0.8 && 
+          newPos.y >= ey - element.size[1]/2 - 0.2 && 
+          velocity.y <= 0) {
         
-        switch (config.type) {
-          case 'box':
-          case 'thin-box':
-          case 'tiny-box':
-            isOnThisPlatform = Math.abs(newPos.x) <= config.size[0]/2 && Math.abs(newPos.z) <= config.size[2]/2;
-            break;
-            
-          case 'cylinder':
-            isOnThisPlatform = Math.sqrt(newPos.x * newPos.x + newPos.z * newPos.z) <= config.size[0];
-            break;
-            
-          case 'cross':
-          case 'small-cross':
-            const crossSize = config.size[0];
-            isOnThisPlatform = (Math.abs(newPos.x) <= crossSize/2 && Math.abs(newPos.z) <= crossSize/6) ||
-                             (Math.abs(newPos.z) <= crossSize/2 && Math.abs(newPos.x) <= crossSize/6);
-            break;
-            
-          case 'L-shape':
-            const lSize = config.size[0];
-            isOnThisPlatform = (newPos.x >= -lSize/2 && newPos.x <= 0 && Math.abs(newPos.z) <= config.size[2]/2) ||
-                             (newPos.z >= -config.size[2]/2 && newPos.z <= 0 && newPos.x >= -lSize/2 && newPos.x <= lSize/2);
-            break;
-            
-          case 'triangle':
-            const triSize = config.size[0];
-            isOnThisPlatform = newPos.z >= -triSize/2 && newPos.z <= triSize/2 && 
-                             Math.abs(newPos.x) <= (triSize/2) * (1 - (newPos.z + triSize/2) / triSize);
-            break;
-            
-          case 'diamond':
-            const diamondSize = config.size[0];
-            isOnThisPlatform = Math.abs(newPos.x) + Math.abs(newPos.z) <= diamondSize/2;
-            break;
-            
-          case 'star':
-            const starSize = config.size[0];
-            const angle = Math.atan2(newPos.z, newPos.x);
-            const distance = Math.sqrt(newPos.x * newPos.x + newPos.z * newPos.z);
-            const starRadius = starSize/3 * (1 + 0.3 * Math.cos(5 * angle));
-            isOnThisPlatform = distance <= starRadius;
-            break;
-            
-          case 'hexagon':
-            const hexSize = config.size[0];
-            const hexDistance = Math.sqrt(newPos.x * newPos.x + newPos.z * newPos.z);
-            const hexAngle = Math.atan2(newPos.z, newPos.x);
-            const hexRadius = hexSize/2 * Math.cos(Math.PI/6) / Math.cos((hexAngle % (Math.PI/3)) - Math.PI/6);
-            isOnThisPlatform = hexDistance <= Math.abs(hexRadius);
-            break;
-            
-          case 'T-shape':
-            const tSize = config.size[0];
-            isOnThisPlatform = (Math.abs(newPos.x) <= tSize/2 && newPos.z >= 0 && newPos.z <= config.size[2]/4) ||
-                             (Math.abs(newPos.x) <= tSize/6 && newPos.z >= -config.size[2]/2 && newPos.z <= config.size[2]/2);
-            break;
-            
-          case 'final-platform':
-            isOnThisPlatform = Math.abs(newPos.x) <= config.size[0]/2 && Math.abs(newPos.z) <= config.size[2]/2;
-            break;
+        let isOnThisElement = false;
+        
+        if (element.type === 'box') {
+          const [w, h, d] = element.size;
+          isOnThisElement = Math.abs(newPos.x - ex) <= w/2 && 
+                           Math.abs(newPos.z - ez) <= d/2;
+        } else if (element.type === 'sphere') {
+          const radius = element.size[0];
+          const distance = Math.sqrt(
+            (newPos.x - ex) ** 2 + (newPos.z - ez) ** 2
+          );
+          isOnThisElement = distance <= radius;
+        } else if (element.type === 'cylinder') {
+          const radius = element.size[0];
+          const distance = Math.sqrt(
+            (newPos.x - ex) ** 2 + (newPos.z - ez) ** 2
+          );
+          isOnThisElement = distance <= radius;
         }
         
-        if (isOnThisPlatform) {
-          newPos.y = platformY + 0.6;
+        if (isOnThisElement) {
+          newPos.y = ey + element.size[1]/2 + 0.8;
           newVelocity.y = 0;
           onPlatform = true;
           setIsGrounded(true);
           break;
         }
       }
-    }
-
-    // Ground collision
-    if (newPos.y <= 0.5) {
-      newPos.y = 0.5;
-      newVelocity.y = 0;
-      onPlatform = true;
-      setIsGrounded(true);
     }
 
     if (!onPlatform && newVelocity.y <= 0) {
@@ -222,11 +244,11 @@ function Player({ position, onPositionChange }) {
 
     // Update camera to follow player
     camera.position.set(
-      newPos.x + 12,
-      newPos.y + 10,
-      newPos.z + 12
+      newPos.x + 15,
+      newPos.y + 12,
+      newPos.z + 15
     );
-    camera.lookAt(newPos.x, newPos.y, newPos.z);
+    camera.lookAt(newPos.x, newPos.y + 2, newPos.z);
   });
 
   return (
@@ -236,248 +258,265 @@ function Player({ position, onPositionChange }) {
   );
 }
 
-// Individual platform components
-function CrossPlatform({ position, size, color }) {
-  return (
-    <group position={position}>
-      <Box position={[0, 0, 0]} args={[size[0], size[1], size[0]/3]}>
-        <meshStandardMaterial color={color} />
-      </Box>
-      <Box position={[0, 0, 0]} args={[size[0]/3, size[1], size[0]]}>
-        <meshStandardMaterial color={color} />
-      </Box>
-    </group>
-  );
-}
-
-function LPlatform({ position, size, color }) {
-  return (
-    <group position={position}>
-      <Box position={[-size[0]/4, 0, 0]} args={[size[0]/2, size[1], size[2]]}>
-        <meshStandardMaterial color={color} />
-      </Box>
-      <Box position={[0, 0, -size[2]/4]} args={[size[0], size[1], size[2]/2]}>
-        <meshStandardMaterial color={color} />
-      </Box>
-    </group>
-  );
-}
-
-function TrianglePlatform({ position, size, color }) {
-  const geometry = new THREE.ConeGeometry(size[0]/2, size[1], 3);
-  geometry.rotateX(-Math.PI / 2);
+// Tower component with multiple climbing elements per floor
+function Tower() {
+  const elements = [];
   
-  return (
-    <mesh position={position} geometry={geometry}>
-      <meshStandardMaterial color={color} />
-    </mesh>
+  // Ground
+  elements.push(
+    <Box key="ground" position={[0, 0, 0]} args={[12, 0.2, 12]}>
+      <meshStandardMaterial color="#8b4513" />
+    </Box>
   );
-}
-
-function DiamondPlatform({ position, size, color }) {
-  const geometry = new THREE.ConeGeometry(size[0]/2, size[1], 4);
-  geometry.rotateX(-Math.PI / 2);
-  geometry.rotateY(Math.PI / 4);
   
-  return (
-    <mesh position={position} geometry={geometry}>
-      <meshStandardMaterial color={color} />
-    </mesh>
+  // Floor 1: Stepping stones in a circle (Red theme)
+  const floor1Y = 4;
+  for (let i = 0; i < 8; i++) {
+    const angle = (i / 8) * Math.PI * 2;
+    const x = Math.cos(angle) * 3;
+    const z = Math.sin(angle) * 3;
+    elements.push(
+      <Box key={`f1-${i}`} position={[x, floor1Y, z]} args={[1.2, 0.3, 1.2]}>
+        <meshStandardMaterial color="#ff4444" />
+      </Box>
+    );
+  }
+  elements.push(
+    <Box key="f1-center" position={[0, floor1Y + 1, 0]} args={[2, 0.3, 2]}>
+      <meshStandardMaterial color="#ff6666" />
+    </Box>
   );
-}
-
-function StarPlatform({ position, size, color }) {
-  const shape = new THREE.Shape();
-  const outerRadius = size[0]/2;
-  const innerRadius = outerRadius * 0.4;
   
-  for (let i = 0; i < 10; i++) {
-    const angle = (i / 10) * Math.PI * 2;
-    const radius = i % 2 === 0 ? outerRadius : innerRadius;
+  // Floor 2: Bouncing spheres and boxes (Green theme)
+  const floor2Y = 8;
+  elements.push(
+    <Sphere key="f2-sphere1" position={[-2, floor2Y, -2]} args={[0.8]}>
+      <meshStandardMaterial color="#44ff44" />
+    </Sphere>
+  );
+  elements.push(
+    <Box key="f2-box1" position={[0, floor2Y + 0.5, 0]} args={[1, 1, 1]}>
+      <meshStandardMaterial color="#66ff66" />
+    </Box>
+  );
+  elements.push(
+    <Sphere key="f2-sphere2" position={[2, floor2Y + 0.3, 2]} args={[0.8]}>
+      <meshStandardMaterial color="#88ff88" />
+    </Sphere>
+  );
+  elements.push(
+    <Box key="f2-box2" position={[-3, floor2Y + 1, 3]} args={[1.5, 0.3, 1.5]}>
+      <meshStandardMaterial color="#44ff44" />
+    </Box>
+  );
+  elements.push(
+    <Box key="f2-box3" position={[3, floor2Y + 1.5, -1]} args={[1, 0.3, 2]}>
+      <meshStandardMaterial color="#66ff66" />
+    </Box>
+  );
+  
+  // Floor 3: Ladder-like vertical elements (Blue theme)
+  const floor3Y = 12;
+  for (let i = 0; i < 5; i++) {
+    elements.push(
+      <Box key={`f3-left-${i}`} position={[-2, floor3Y + i * 0.7, 0]} args={[0.3, 0.3, 2]}>
+        <meshStandardMaterial color={`hsl(240, 100%, ${60 + i * 5}%)`} />
+      </Box>
+    );
+    elements.push(
+      <Box key={`f3-right-${i}`} position={[2, floor3Y + i * 0.7, 0]} args={[0.3, 0.3, 2]}>
+        <meshStandardMaterial color={`hsl(240, 100%, ${60 + i * 5}%)`} />
+      </Box>
+    );
+  }
+  elements.push(
+    <Box key="f3-top" position={[0, floor3Y + 3, 0]} args={[3, 0.3, 1]}>
+      <meshStandardMaterial color="#4444ff" />
+    </Box>
+  );
+  
+  // Floor 4: Spiral staircase (Purple theme)
+  const floor4Y = 16;
+  for (let i = 0; i < 12; i++) {
+    const angle = (i / 12) * Math.PI * 2;
+    const radius = 2.5;
     const x = Math.cos(angle) * radius;
-    const y = Math.sin(angle) * radius;
-    
-    if (i === 0) {
-      shape.moveTo(x, y);
-    } else {
-      shape.lineTo(x, y);
-    }
+    const z = Math.sin(angle) * radius;
+    const y = floor4Y + (i * 0.3);
+    elements.push(
+      <Box key={`f4-${i}`} position={[x, y, z]} args={[0.8, 0.2, 0.8]}>
+        <meshStandardMaterial color={`hsl(${280 + i * 5}, 80%, 60%)`} />
+      </Box>
+    );
   }
   
-  const geometry = new THREE.ExtrudeGeometry(shape, { depth: size[1], bevelEnabled: false });
-  geometry.rotateX(-Math.PI / 2);
-  
-  return (
-    <mesh position={position} geometry={geometry}>
-      <meshStandardMaterial color={color} />
-    </mesh>
-  );
-}
-
-function HexagonPlatform({ position, size, color }) {
-  const geometry = new THREE.CylinderGeometry(size[0]/2, size[0]/2, size[1], 6);
-  
-  return (
-    <mesh position={position} geometry={geometry}>
-      <meshStandardMaterial color={color} />
-    </mesh>
-  );
-}
-
-function TPlatform({ position, size, color }) {
-  return (
-    <group position={position}>
-      <Box position={[0, 0, size[2]/4]} args={[size[0], size[1], size[2]/2]}>
-        <meshStandardMaterial color={color} />
-      </Box>
-      <Box position={[0, 0, -size[2]/4]} args={[size[0]/3, size[1], size[2]/2]}>
-        <meshStandardMaterial color={color} />
-      </Box>
-    </group>
-  );
-}
-
-// Tower component with varied platforms
-function Tower() {
-  const platformConfigs = [
-    // Ground level
-    { type: 'box', size: [8, 0.2, 8], color: '#8b4513' },
-    // Level 1-5: Basic shapes with vibrant colors
-    { type: 'box', size: [6, 0.2, 6], color: '#ff0080' },
-    { type: 'cylinder', size: [5, 0.2, 16], color: '#00ff80' },
-    { type: 'box', size: [7, 0.2, 3], color: '#8000ff' },
-    { type: 'cross', size: [4, 0.2, 4], color: '#ff8000' },
-    { type: 'cylinder', size: [4, 0.2, 16], color: '#0080ff' },
-    // Level 6-10: More challenging shapes
-    { type: 'L-shape', size: [5, 0.2, 3], color: '#ff0040' },
-    { type: 'triangle', size: [5, 0.2, 5], color: '#40ff00' },
-    { type: 'box', size: [3, 0.2, 7], color: '#ff4080' },
-    { type: 'cylinder', size: [3.5, 0.2, 16], color: '#8040ff' },
-    { type: 'diamond', size: [4, 0.2, 4], color: '#ff8040' },
-    // Level 11-15: Advanced shapes
-    { type: 'star', size: [4, 0.2, 4], color: '#40ffff' },
-    { type: 'box', size: [2.5, 0.2, 5], color: '#ff4040' },
-    { type: 'hexagon', size: [3.5, 0.2, 3.5], color: '#80ff40' },
-    { type: 'T-shape', size: [4, 0.2, 3], color: '#4080ff' },
-    { type: 'cylinder', size: [2.5, 0.2, 16], color: '#ff80ff' },
-    // Level 16-20: Very challenging
-    { type: 'thin-box', size: [1.5, 0.2, 4], color: '#ffff00' },
-    { type: 'small-cross', size: [2.5, 0.2, 2.5], color: '#ff0000' },
-    { type: 'cylinder', size: [2, 0.2, 16], color: '#00ffff' },
-    { type: 'tiny-box', size: [2, 0.2, 2], color: '#ff00ff' },
-    { type: 'final-platform', size: [3, 0.2, 3], color: '#ffd700' }
+  // Floor 5: Floating platforms (Orange theme)
+  const floor5Y = 20;
+  const platforms = [
+    { pos: [-3, floor5Y, -3], size: [1.5, 0.3, 1.5], type: 'box' },
+    { pos: [0, floor5Y + 0.5, 0], size: [1], type: 'sphere' },
+    { pos: [3, floor5Y + 1, 3], size: [1.5, 0.3, 1.5], type: 'box' },
+    { pos: [-2, floor5Y + 1.5, 2], size: [1, 0.3, 1], type: 'box' },
+    { pos: [1, floor5Y + 2, -2], size: [1, 0.3, 1], type: 'box' }
   ];
-
-  const platforms = [];
-  
-  platformConfigs.forEach((config, i) => {
-    const platformY = i * 4;
-    const position = [0, platformY, 0];
-    
-    // Add platform based on type
-    switch (config.type) {
-      case 'box':
-      case 'thin-box':
-      case 'tiny-box':
-      case 'final-platform':
-        platforms.push(
-          <Box key={i} position={position} args={config.size}>
-            <meshStandardMaterial 
-              color={config.color} 
-              emissive={config.type === 'final-platform' ? '#332200' : '#000000'} 
-              emissiveIntensity={config.type === 'final-platform' ? 0.3 : 0}
-            />
-          </Box>
-        );
-        break;
-        
-      case 'cylinder':
-        platforms.push(
-          <Cylinder key={i} position={position} args={[config.size[0], config.size[0], config.size[1], config.size[2]]}>
-            <meshStandardMaterial color={config.color} />
-          </Cylinder>
-        );
-        break;
-        
-      case 'cross':
-      case 'small-cross':
-        platforms.push(
-          <CrossPlatform key={i} position={position} size={config.size} color={config.color} />
-        );
-        break;
-        
-      case 'L-shape':
-        platforms.push(
-          <LPlatform key={i} position={position} size={config.size} color={config.color} />
-        );
-        break;
-        
-      case 'triangle':
-        platforms.push(
-          <TrianglePlatform key={i} position={position} size={config.size} color={config.color} />
-        );
-        break;
-        
-      case 'diamond':
-        platforms.push(
-          <DiamondPlatform key={i} position={position} size={config.size} color={config.color} />
-        );
-        break;
-        
-      case 'star':
-        platforms.push(
-          <StarPlatform key={i} position={position} size={config.size} color={config.color} />
-        );
-        break;
-        
-      case 'hexagon':
-        platforms.push(
-          <HexagonPlatform key={i} position={position} size={config.size} color={config.color} />
-        );
-        break;
-        
-      case 'T-shape':
-        platforms.push(
-          <TPlatform key={i} position={position} size={config.size} color={config.color} />
-        );
-        break;
-    }
-    
-    // Add floor number
-    if (i > 0) {
-      platforms.push(
-        <Text
-          key={`text-${i}`}
-          position={[0, platformY + 1.5, 0]}
-          fontSize={0.5}
-          color="white"
-          anchorX="center"
-          anchorY="middle"
-        >
-          Floor {i}
-        </Text>
+  platforms.forEach((platform, i) => {
+    if (platform.type === 'sphere') {
+      elements.push(
+        <Sphere key={`f5-${i}`} position={platform.pos} args={platform.size}>
+          <meshStandardMaterial color="#ff8844" />
+        </Sphere>
+      );
+    } else {
+      elements.push(
+        <Box key={`f5-${i}`} position={platform.pos} args={platform.size}>
+          <meshStandardMaterial color={`hsl(${30 + i * 10}, 80%, 60%)`} />
+        </Box>
       );
     }
   });
+  
+  // Floor 6: Zigzag pattern (Cyan theme)
+  const floor6Y = 24;
+  const zigzagPoints = [
+    [-4, 0, -4], [-2, 0.5, -2], [0, 1, 0], [2, 1.5, 2], [4, 2, 4],
+    [3, 2.5, -3], [1, 3, -1], [-1, 3.5, 1], [-3, 4, 3]
+  ];
+  zigzagPoints.forEach(([x, yOffset, z], i) => {
+    elements.push(
+      <Box key={`f6-${i}`} position={[x, floor6Y + yOffset, z]} args={[1, 0.3, 1]}>
+        <meshStandardMaterial color={`hsl(${180 + i * 10}, 80%, 60%)`} />
+      </Box>
+    );
+  });
+  
+  // Floor 7: Column climbing (Yellow theme)
+  const floor7Y = 28;
+  elements.push(
+    <Cylinder key="f7-col1" position={[-2, floor7Y + 1, -2]} args={[0.5, 0.5, 2]}>
+      <meshStandardMaterial color="#ffff44" />
+    </Cylinder>
+  );
+  elements.push(
+    <Cylinder key="f7-col2" position={[2, floor7Y + 2, 2]} args={[0.5, 0.5, 4]}>
+      <meshStandardMaterial color="#ffff66" />
+    </Cylinder>
+  );
+  elements.push(
+    <Cylinder key="f7-col3" position={[0, floor7Y + 3, 0]} args={[0.5, 0.5, 6]}>
+      <meshStandardMaterial color="#ffff88" />
+    </Cylinder>
+  );
+  elements.push(
+    <Box key="f7-top" position={[0, floor7Y + 6, 0]} args={[3, 0.3, 3]}>
+      <meshStandardMaterial color="#ffffaa" />
+    </Box>
+  );
+  
+  // Floor 8: Sphere jumping (Pink theme)
+  const floor8Y = 32;
+  for (let i = 0; i < 6; i++) {
+    const angle = (i / 6) * Math.PI * 2;
+    const x = Math.cos(angle) * 2.5;
+    const z = Math.sin(angle) * 2.5;
+    elements.push(
+      <Sphere key={`f8-${i}`} position={[x, floor8Y + 1 + i * 0.3, z]} args={[0.6]}>
+        <meshStandardMaterial color={`hsl(${320 + i * 10}, 80%, 70%)`} />
+      </Sphere>
+    );
+  }
+  elements.push(
+    <Box key="f8-center" position={[0, floor8Y + 3, 0]} args={[2, 0.3, 2]}>
+      <meshStandardMaterial color="#ff44ff" />
+    </Box>
+  );
+  
+  // Floor 9: Mixed obstacles (Multi-color)
+  const floor9Y = 36;
+  elements.push(
+    <Box key="f9-1" position={[-3, floor9Y, 0]} args={[0.8, 1.5, 0.8]}>
+      <meshStandardMaterial color="#ff6644" />
+    </Box>
+  );
+  elements.push(
+    <Sphere key="f9-2" position={[-1, floor9Y + 1, -2]} args={[0.7]}>
+      <meshStandardMaterial color="#44ff66" />
+    </Sphere>
+  );
+  elements.push(
+    <Box key="f9-3" position={[1, floor9Y + 0.5, 1]} args={[1, 1, 1]}>
+      <meshStandardMaterial color="#6644ff" />
+    </Box>
+  );
+  elements.push(
+    <Cylinder key="f9-4" position={[3, floor9Y + 1, -1]} args={[0.4, 0.4, 2]}>
+      <meshStandardMaterial color="#ff44aa" />
+    </Cylinder>
+  );
+  elements.push(
+    <Box key="f9-top" position={[0, floor9Y + 2.5, 0]} args={[2.5, 0.3, 2.5]}>
+      <meshStandardMaterial color="#44aaff" />
+    </Box>
+  );
+  
+  // Floor 10: Final challenge - narrow beam walk (Gold theme)
+  const floor10Y = 40;
+  const beamPositions = [
+    [-4, floor10Y, 0], [-2, floor10Y + 0.5, 0], [0, floor10Y + 1, 0], 
+    [2, floor10Y + 1.5, 0], [4, floor10Y + 2, 0]
+  ];
+  beamPositions.forEach((pos, i) => {
+    elements.push(
+      <Box key={`f10-${i}`} position={pos} args={[0.5, 0.3, 0.5]}>
+        <meshStandardMaterial color={`hsl(${45 + i * 5}, 100%, ${70 + i * 5}%)`} />
+      </Box>
+    );
+  });
+  
+  // Victory platform
+  elements.push(
+    <Box key="victory" position={[0, floor10Y + 4, 0]} args={[3, 0.5, 3]}>
+      <meshStandardMaterial 
+        color="#ffd700" 
+        emissive="#332200" 
+        emissiveIntensity={0.3}
+      />
+    </Box>
+  );
+  
+  // Add floor labels
+  for (let i = 1; i <= 10; i++) {
+    elements.push(
+      <Text
+        key={`label-${i}`}
+        position={[6, i * 4 + 2, 0]}
+        fontSize={0.8}
+        color="white"
+        anchorX="center"
+        anchorY="middle"
+      >
+        Floor {i}
+      </Text>
+    );
+  }
 
-  return <group>{platforms}</group>;
+  return <group>{elements}</group>;
 }
 
 // Victory message component
 function VictoryMessage({ playerY }) {
-  const isAtTop = playerY > 75; // Player reached the top
+  const isAtTop = playerY > 43; // Player reached the victory platform
   
   if (!isAtTop) return null;
   
   return (
     <Text
-      position={[0, 85, 0]}
+      position={[0, 50, 0]}
       fontSize={2}
       color="#ffd700"
       anchorX="center"
       anchorY="middle"
     >
-      🎉 VICTORY! 🎉{'\n'}You conquered the Hell Tower!
+      🎉 VICTORY! 🎉{'\n'}Master of the Hell Tower!
     </Text>
   );
 }
@@ -489,13 +528,13 @@ function Game() {
   return (
     <Canvas
       style={{ height: '100vh', background: 'linear-gradient(to top, #1a0000, #330000, #000)' }}
-      camera={{ position: [12, 10, 12], fov: 60 }}
+      camera={{ position: [15, 12, 15], fov: 60 }}
     >
       {/* Enhanced lighting */}
       <ambientLight intensity={0.4} color="#ff4400" />
-      <directionalLight position={[10, 20, 5]} intensity={1} color="#ff6600" />
-      <pointLight position={[0, 50, 0]} intensity={1.5} color="#ff0000" />
-      <spotLight position={[0, 80, 0]} angle={0.3} penumbra={1} intensity={2} color="#ffd700" />
+      <directionalLight position={[20, 30, 10]} intensity={1} color="#ff6600" />
+      <pointLight position={[0, 25, 0]} intensity={1.5} color="#ff0000" />
+      <pointLight position={[0, 50, 0]} intensity={2} color="#ffd700" />
 
       {/* Game objects */}
       <Tower />
@@ -503,7 +542,7 @@ function Game() {
       <VictoryMessage playerY={playerPosition.y} />
 
       {/* Ground */}
-      <Plane position={[0, 0, 0]} rotation={[-Math.PI / 2, 0, 0]} args={[30, 30]}>
+      <Plane position={[0, 0, 0]} rotation={[-Math.PI / 2, 0, 0]} args={[40, 40]}>
         <meshStandardMaterial color="#2b1810" />
       </Plane>
 
@@ -516,14 +555,14 @@ function Game() {
 // UI Component
 function GameUI({ playerY }) {
   const currentFloor = Math.max(0, Math.floor(playerY / 4));
-  const progress = Math.min(100, (currentFloor / 20) * 100);
+  const progress = Math.min(100, (currentFloor / 10) * 100);
 
   return (
     <div className="game-ui">
       <div className="ui-panel">
         <h2>Hell Tower Climb</h2>
         <div className="stats">
-          <div>Floor: {currentFloor}/20</div>
+          <div>Floor: {currentFloor}/10</div>
           <div>Height: {Math.round(playerY)}m</div>
           <div className="progress-bar">
             <div className="progress-fill" style={{ width: `${progress}%` }}></div>
@@ -536,9 +575,9 @@ function GameUI({ playerY }) {
         <h3>Controls:</h3>
         <div>WASD / Arrow Keys - Move</div>
         <div>SPACE / W - Jump</div>
-        <div>Goal: Reach Floor 20!</div>
+        <div>Goal: Reach the Golden Platform!</div>
         <div style={{ marginTop: '10px', fontSize: '12px', color: '#ffaa00' }}>
-          Navigate unique shaped platforms!
+          Use stepping stones, spheres, ladders & more!
         </div>
       </div>
     </div>
