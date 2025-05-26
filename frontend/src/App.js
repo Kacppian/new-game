@@ -36,8 +36,8 @@ function Player({ position, onPositionChange }) {
   const getClimbableElements = () => {
     const elements = [];
     
-    // Ground
-    elements.push({ type: 'box', pos: [0, 0, 0], size: [20, 0.2, 20] });
+    // Ground (much larger with safety margin)
+    elements.push({ type: 'box', pos: [0, 0, 0], size: [30, 0.2, 30] });
     
     // Floor 1: Stepping stones in a wider circle
     const floor1Y = 8;
@@ -133,13 +133,22 @@ function Player({ position, onPositionChange }) {
     return elements;
   };
 
+  // Safe respawn function
+  const respawnPlayer = () => {
+    if (meshRef.current) {
+      meshRef.current.position.set(0, 2, 0);
+      setVelocity({ x: 0, y: 0, z: 0 });
+      setIsGrounded(true);
+    }
+  };
+
   // Physics and movement
   useFrame((state, delta) => {
     if (!meshRef.current) return;
 
-    const moveSpeed = 10;
-    const jumpForce = 15;
-    const gravity = -25;
+    const moveSpeed = 15; // Increased movement speed
+    const jumpForce = 20; // Increased jump force
+    const gravity = -30;
 
     // Get current position
     const currentPos = meshRef.current.position;
@@ -148,13 +157,13 @@ function Player({ position, onPositionChange }) {
     let newVelocity = { ...velocity };
     newVelocity.y += gravity * delta;
 
-    // Handle movement
+    // Handle movement with better responsiveness
     if (keys['KeyA'] || keys['ArrowLeft']) {
       newVelocity.x = -moveSpeed;
     } else if (keys['KeyD'] || keys['ArrowRight']) {
       newVelocity.x = moveSpeed;
     } else {
-      newVelocity.x *= 0.8; // Friction
+      newVelocity.x *= 0.85; // Less friction for better control
     }
 
     if (keys['KeyW'] || keys['ArrowUp']) {
@@ -162,11 +171,11 @@ function Player({ position, onPositionChange }) {
     } else if (keys['KeyS'] || keys['ArrowDown']) {
       newVelocity.z = moveSpeed;
     } else {
-      newVelocity.z *= 0.8; // Friction
+      newVelocity.z *= 0.85; // Less friction for better control
     }
 
-    // Jumping
-    if ((keys['Space'] || keys['KeyW']) && isGrounded) {
+    // Jumping with better force
+    if (keys['Space'] && isGrounded) {
       newVelocity.y = jumpForce;
       setIsGrounded(false);
     }
@@ -186,32 +195,32 @@ function Player({ position, onPositionChange }) {
       const [ex, ey, ez] = element.pos;
       
       if (newPos.y <= ey + element.size[1]/2 + 0.8 && 
-          newPos.y >= ey - element.size[1]/2 - 0.2 && 
-          velocity.y <= 0) {
+          newPos.y >= ey - element.size[1]/2 - 0.5 && 
+          velocity.y <= 0.1) { // More forgiving landing detection
         
         let isOnThisElement = false;
         
         if (element.type === 'box') {
           const [w, h, d] = element.size;
-          isOnThisElement = Math.abs(newPos.x - ex) <= w/2 && 
-                           Math.abs(newPos.z - ez) <= d/2;
+          isOnThisElement = Math.abs(newPos.x - ex) <= w/2 + 0.2 && // Slightly more forgiving collision
+                           Math.abs(newPos.z - ez) <= d/2 + 0.2;
         } else if (element.type === 'sphere') {
           const radius = element.size[0];
           const distance = Math.sqrt(
             (newPos.x - ex) ** 2 + (newPos.z - ez) ** 2
           );
-          isOnThisElement = distance <= radius;
+          isOnThisElement = distance <= radius + 0.3; // More forgiving sphere collision
         } else if (element.type === 'cylinder') {
           const radius = element.size[0];
           const distance = Math.sqrt(
             (newPos.x - ex) ** 2 + (newPos.z - ez) ** 2
           );
-          isOnThisElement = distance <= radius;
+          isOnThisElement = distance <= radius + 0.3; // More forgiving cylinder collision
         }
         
         if (isOnThisElement) {
           newPos.y = ey + element.size[1]/2 + 0.8;
-          newVelocity.y = 0;
+          newVelocity.y = Math.max(0, newVelocity.y); // Don't reset upward velocity
           onPlatform = true;
           setIsGrounded(true);
           break;
@@ -223,18 +232,28 @@ function Player({ position, onPositionChange }) {
       setIsGrounded(false);
     }
 
-    // Keep player within reasonable bounds
-    newPos.x = Math.max(-25, Math.min(25, newPos.x));
-    newPos.z = Math.max(-25, Math.min(25, newPos.z));
-
-    // Reset if player falls too far
-    if (newPos.y < -10) {
-      newPos.x = 0;
-      newPos.y = 1;
-      newPos.z = 0;
-      newVelocity = { x: 0, y: 0, z: 0 };
+    // World boundaries - prevent falling off the world
+    const worldBoundary = 12; // Keep player within ground area
+    if (Math.abs(newPos.x) > worldBoundary || Math.abs(newPos.z) > worldBoundary) {
+      // If player tries to go outside bounds, push them back
+      if (Math.abs(newPos.x) > worldBoundary) {
+        newPos.x = Math.sign(newPos.x) * worldBoundary;
+        newVelocity.x = 0;
+      }
+      if (Math.abs(newPos.z) > worldBoundary) {
+        newPos.z = Math.sign(newPos.z) * worldBoundary;
+        newVelocity.z = 0;
+      }
     }
 
+    // Safety respawn if player falls too far or gets stuck
+    if (newPos.y < -5) {
+      console.log("Player fell too far, respawning...");
+      respawnPlayer();
+      return;
+    }
+
+    // Update player position
     meshRef.current.position.set(newPos.x, newPos.y, newPos.z);
     setVelocity(newVelocity);
     
@@ -295,16 +314,64 @@ function DynamicBackground({ playerY }) {
   return null;
 }
 
+// Invisible boundaries to keep player safe
+function SafetyBoundaries() {
+  const boundaryHeight = 200;
+  const boundarySize = 15;
+  
+  return (
+    <group>
+      {/* Invisible walls around the play area */}
+      <Box position={[boundarySize, boundaryHeight/2, 0]} args={[1, boundaryHeight, boundarySize * 2]} visible={false}>
+        <meshStandardMaterial transparent opacity={0} />
+      </Box>
+      <Box position={[-boundarySize, boundaryHeight/2, 0]} args={[1, boundaryHeight, boundarySize * 2]} visible={false}>
+        <meshStandardMaterial transparent opacity={0} />
+      </Box>
+      <Box position={[0, boundaryHeight/2, boundarySize]} args={[boundarySize * 2, boundaryHeight, 1]} visible={false}>
+        <meshStandardMaterial transparent opacity={0} />
+      </Box>
+      <Box position={[0, boundaryHeight/2, -boundarySize]} args={[boundarySize * 2, boundaryHeight, 1]} visible={false}>
+        <meshStandardMaterial transparent opacity={0} />
+      </Box>
+    </group>
+  );
+}
+
 // Tower component with much more spacious design
 function Tower() {
   const elements = [];
   
-  // Ground (much larger)
+  // Ground (much larger with visible boundaries)
   elements.push(
-    <Box key="ground" position={[0, 0, 0]} args={[20, 0.2, 20]}>
+    <Box key="ground" position={[0, 0, 0]} args={[30, 0.2, 30]}>
       <meshStandardMaterial color="#8b4513" />
     </Box>
   );
+  
+  // Add visible boundary markers
+  for (let i = -12; i <= 12; i += 6) {
+    elements.push(
+      <Box key={`boundary-x-${i}`} position={[i, 0.5, 12]} args={[0.2, 1, 0.2]}>
+        <meshStandardMaterial color="#654321" />
+      </Box>
+    );
+    elements.push(
+      <Box key={`boundary-x-neg-${i}`} position={[i, 0.5, -12]} args={[0.2, 1, 0.2]}>
+        <meshStandardMaterial color="#654321" />
+      </Box>
+    );
+    elements.push(
+      <Box key={`boundary-z-${i}`} position={[12, 0.5, i]} args={[0.2, 1, 0.2]}>
+        <meshStandardMaterial color="#654321" />
+      </Box>
+    );
+    elements.push(
+      <Box key={`boundary-z-neg-${i}`} position={[-12, 0.5, i]} args={[0.2, 1, 0.2]}>
+        <meshStandardMaterial color="#654321" />
+      </Box>
+    );
+  }
   
   // Floor 1: Stepping stones in a wider circle (White zone)
   const floor1Y = 8;
@@ -576,6 +643,9 @@ function Game() {
       <pointLight position={[0, 40, 0]} intensity={1} color="#ffffff" />
       <pointLight position={[0, 80, 0]} intensity={1.5} color="#ffd700" />
 
+      {/* Safety boundaries */}
+      <SafetyBoundaries />
+
       {/* Game objects */}
       <Tower />
       <Player position={[0, 1, 0]} onPositionChange={setPlayerPosition} />
@@ -622,10 +692,10 @@ function GameUI({ playerY }) {
       <div className="controls-panel">
         <h3>Controls:</h3>
         <div>WASD / Arrow Keys - Move</div>
-        <div>SPACE / W - Jump</div>
+        <div>SPACE - Jump</div>
         <div>Goal: Reach the Golden Platform!</div>
         <div style={{ marginTop: '10px', fontSize: '12px', color: '#666' }}>
-          Explore the spacious tower through color zones!
+          Enhanced jumping & safe boundaries!
         </div>
       </div>
     </div>
