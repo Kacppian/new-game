@@ -1,7 +1,8 @@
-import React, { useRef, useState, useEffect, useCallback } from 'react';
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { OrbitControls, Box, Plane, Text, Cylinder, Sphere } from '@react-three/drei';
-import * as THREE from 'three';
+import React, { useState, useEffect } from 'react';
+import { Canvas } from '@react-three/fiber';
+import { Environment, Stars } from '@react-three/drei';
+import RobloxCharacter from './RobloxCharacter';
+import ObbyEnvironment from './ObbyEnvironment';
 import './App.css';
 
 // Player component
