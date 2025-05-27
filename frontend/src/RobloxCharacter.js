@@ -25,6 +25,85 @@ function RobloxCharacter({ position, onPositionChange, onCheckpointReached }) {
   const [characterRotation, setCharacterRotation] = useState(0);
   const [cameraRotation, setCameraRotation] = useState({ horizontal: 0, vertical: 0 });
 
+  // Shared platform data - moved here for collision detection
+  const getObbyElements = () => {
+    const elements = [];
+    
+    // Central spawn area - large safe platform
+    elements.push({ 
+      type: 'platform', 
+      pos: [0, 0, 0], 
+      size: [6, 0.5, 6], 
+      color: '#90EE90',
+      material: 'spawn'
+    });
+    
+    // Tower parameters for spiral path
+    const centerX = 0;
+    const centerZ = 0;
+    const baseRadius = 8;
+    const totalLevels = 50;
+    const heightIncrement = 0.8;
+    const platformsPerRotation = 12;
+    
+    // Create connected spiral path
+    for (let level = 0; level < totalLevels; level++) {
+      const angle = (level / platformsPerRotation) * Math.PI * 2;
+      const height = 1.5 + level * heightIncrement;
+      const radius = baseRadius + Math.sin(level * 0.2) * 1;
+      
+      const x = centerX + Math.cos(angle) * radius;
+      const z = centerZ + Math.sin(angle) * radius;
+      
+      // Platform size and color based on difficulty
+      let platformSize = [2.5, 0.5, 2.5];
+      let platformColor = '#87CEEB';
+      
+      if (height < 10) {
+        platformSize = [3, 0.5, 3];
+        platformColor = '#87CEEB';
+      } else if (height < 20) {
+        platformSize = [2.5, 0.5, 2.5];
+        platformColor = '#FFB6C1';
+      } else if (height < 30) {
+        platformSize = [2, 0.5, 2];
+        platformColor = '#DDA0DD';
+      } else {
+        platformSize = [1.8, 0.5, 1.8];
+        platformColor = '#FF6347';
+      }
+      
+      // Main spiral platform
+      elements.push({
+        type: 'platform',
+        pos: [x, height, z],
+        size: platformSize,
+        color: platformColor
+      });
+      
+      // Add bridge platforms for easier transitions
+      if (level % 4 === 1 && level > 0) {
+        const prevAngle = ((level - 1) / platformsPerRotation) * Math.PI * 2;
+        const prevX = centerX + Math.cos(prevAngle) * radius;
+        const prevZ = centerZ + Math.sin(prevAngle) * radius;
+        const prevHeight = 1.5 + (level - 1) * heightIncrement;
+        
+        const bridgeX = (x + prevX) / 2;
+        const bridgeZ = (z + prevZ) / 2;
+        const bridgeHeight = (height + prevHeight) / 2;
+        
+        elements.push({
+          type: 'platform',
+          pos: [bridgeX, bridgeHeight, bridgeZ],
+          size: [1.5, 0.5, 1.5],
+          color: '#98FB98'
+        });
+      }
+    }
+    
+    return elements;
+  };
+
   // Handle keyboard input - Arrow keys for camera, WASD for movement
   useEffect(() => {
     const handleKeyDown = (event) => {
