@@ -201,28 +201,28 @@ function RobloxCharacter({ position, onPositionChange, onCheckpointReached }) {
     let newVelocity = { ...velocity };
     newVelocity.y += gravity * delta;
 
-    // Handle movement like typical Roblox games
+    // Handle movement - WASD only for character movement
     let isMoving = false;
     let moveVector = new THREE.Vector3(0, 0, 0);
     let targetRotation = characterRotation;
     
-    // WASD - World direction movement (like Roblox)
-    if (keys['KeyW'] || keys['ArrowUp']) {
+    // WASD - Simple world direction movement
+    if (keys['KeyW']) {
       moveVector.z = -1; // Forward (negative Z is forward in 3D)
       targetRotation = 0; // Face forward
       isMoving = true;
     }
-    if (keys['KeyS'] || keys['ArrowDown']) {
+    if (keys['KeyS']) {
       moveVector.z = 1; // Backward
       targetRotation = Math.PI; // Face backward
       isMoving = true;
     }
-    if (keys['KeyA'] || keys['ArrowLeft']) {
+    if (keys['KeyA']) {
       moveVector.x = -1; // Left
       targetRotation = Math.PI / 2; // Face left
       isMoving = true;
     }
-    if (keys['KeyD'] || keys['ArrowRight']) {
+    if (keys['KeyD']) {
       moveVector.x = 1; // Right
       targetRotation = -Math.PI / 2; // Face right
       isMoving = true;
