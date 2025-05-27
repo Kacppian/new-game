@@ -325,20 +325,29 @@ function RobloxCharacter({ position, onPositionChange, onCheckpointReached }) {
       onPositionChange(newPos);
     }
 
-    // Camera follows player with smooth movement
-    const cameraDistance = 15;
-    const cameraHeight = 8;
+    // Improved camera system for better gameplay
+    const cameraDistance = 8;  // Closer to player
+    const cameraHeight = 6;    // Lower height for better view
+    const cameraSpeed = 0.08;  // Faster follow for responsiveness
     
-    camera.position.lerp(
-      new THREE.Vector3(
-        newPos.x + cameraDistance * 0.8,
-        newPos.y + cameraHeight,
-        newPos.z + cameraDistance * 0.8
-      ),
-      0.05
+    // Camera position relative to player
+    const idealCameraPos = new THREE.Vector3(
+      newPos.x + cameraDistance * 0.7,  // Slightly behind and to the side
+      newPos.y + cameraHeight,          // Above the player
+      newPos.z + cameraDistance * 0.7   // Diagonal view
     );
     
-    camera.lookAt(newPos.x, newPos.y + 1, newPos.z);
+    // Smooth camera movement with better responsiveness
+    camera.position.lerp(idealCameraPos, cameraSpeed);
+    
+    // Look slightly ahead of the player in the direction they're moving
+    const lookTarget = new THREE.Vector3(
+      newPos.x + newVelocity.x * 0.3,  // Look ahead based on movement
+      newPos.y + 2,                    // Look slightly above player
+      newPos.z + newVelocity.z * 0.3   // Look ahead based on movement
+    );
+    
+    camera.lookAt(lookTarget);
   });
 
   return (
