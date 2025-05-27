@@ -65,8 +65,9 @@ function GameUI({ playerPosition, checkpointCount }) {
         <h3>🎯 Controls</h3>
         <div className="control-section">
           <div className="control-header">🎮 Character Movement:</div>
-          <div className="control-item">🔄 WASD - Move Character</div>
+          <div className="control-item">🔄 WASD - Move relative to camera</div>
           <div className="control-item">🚀 Space - Jump</div>
+          <div className="control-note">W = Forward from camera view!</div>
         </div>
         <div className="control-section">
           <div className="control-header">📷 Camera Control:</div>
