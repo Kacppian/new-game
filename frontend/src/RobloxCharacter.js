@@ -295,8 +295,8 @@ function RobloxCharacter({ position, onPositionChange, onCheckpointReached }) {
       const [ex, ey, ez] = element.pos;
       const playerBottom = newPos.y - 0.5; // Character height adjustment
       
-      // Platform collision
-      if (element.type === 'platform' || element.type === 'spawn' || element.type === 'moving_platform') {
+      // Platform collision (including spawn platform)
+      if (element.type === 'platform' || element.type === 'moving_platform') {
         if (playerBottom <= ey + element.size[1]/2 + 0.1 && 
             playerBottom >= ey - element.size[1]/2 - 0.5 && 
             velocity.y <= 0.1) {
