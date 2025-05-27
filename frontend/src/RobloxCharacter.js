@@ -432,7 +432,7 @@ function RobloxCharacter({ position, onPositionChange, onCheckpointReached }) {
   });
 
   return (
-    <group ref={groupRef} position={position}>
+    <group ref={groupRef} position={position} rotation={[0, characterRotation, 0]}>
       {/* Head */}
       <Box ref={headRef} position={[0, 1.5, 0]} args={[0.8, 0.8, 0.8]} castShadow>
         <meshStandardMaterial color="#FFDBAC" />
