@@ -257,19 +257,8 @@ function RobloxCharacter({ position, onPositionChange, onCheckpointReached }) {
       // Calculate the direction the character should face based on movement
       const targetRotation = Math.atan2(moveVector.x, moveVector.z);
       
-      // Smooth character rotation towards movement direction
-      const rotationDiff = targetRotation - characterRotation;
-      let shortestRotation = rotationDiff;
-      
-      // Handle rotation wrap-around (choose shortest path)
-      if (rotationDiff > Math.PI) {
-        shortestRotation = rotationDiff - 2 * Math.PI;
-      } else if (rotationDiff < -Math.PI) {
-        shortestRotation = rotationDiff + 2 * Math.PI;
-      }
-      
-      // Apply smooth rotation
-      setCharacterRotation(prev => prev + shortestRotation * 0.15);
+      // Apply immediate rotation so character faces movement direction
+      setCharacterRotation(targetRotation);
       
       // Apply movement
       moveVector.normalize().multiplyScalar(moveSpeed);
