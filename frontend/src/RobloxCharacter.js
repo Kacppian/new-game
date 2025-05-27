@@ -28,25 +28,35 @@ function RobloxCharacter({ position, onPositionChange, onCheckpointReached }) {
   // Handle keyboard input - Arrow keys for camera, WASD for movement
   useEffect(() => {
     const handleKeyDown = (event) => {
-      setKeys(prev => ({ ...prev, [event.code]: true }));
-      
-      // Arrow keys control camera rotation
+      // Arrow keys control camera rotation ONLY - don't add to movement keys
       if (event.code === 'ArrowLeft') {
         setCameraRotation(prev => ({ ...prev, horizontal: prev.horizontal - 0.1 }));
+        return; // Don't add to keys state
       }
       if (event.code === 'ArrowRight') {
         setCameraRotation(prev => ({ ...prev, horizontal: prev.horizontal + 0.1 }));
+        return; // Don't add to keys state
       }
       if (event.code === 'ArrowUp') {
         setCameraRotation(prev => ({ ...prev, vertical: Math.min(1, prev.vertical + 0.1) }));
+        return; // Don't add to keys state
       }
       if (event.code === 'ArrowDown') {
         setCameraRotation(prev => ({ ...prev, vertical: Math.max(-1, prev.vertical - 0.1) }));
+        return; // Don't add to keys state
+      }
+      
+      // Only add WASD and Space to movement keys
+      if (['KeyW', 'KeyA', 'KeyS', 'KeyD', 'Space'].includes(event.code)) {
+        setKeys(prev => ({ ...prev, [event.code]: true }));
       }
     };
     
     const handleKeyUp = (event) => {
-      setKeys(prev => ({ ...prev, [event.code]: false }));
+      // Only remove WASD and Space from movement keys
+      if (['KeyW', 'KeyA', 'KeyS', 'KeyD', 'Space'].includes(event.code)) {
+        setKeys(prev => ({ ...prev, [event.code]: false }));
+      }
     };
 
     window.addEventListener('keydown', handleKeyDown);
