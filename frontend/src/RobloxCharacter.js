@@ -168,8 +168,11 @@ function RobloxCharacter({ position, onPositionChange, onCheckpointReached }) {
   // Respawn function
   const respawnPlayer = () => {
     if (groupRef.current) {
-      groupRef.current.position.set(lastCheckpoint.x, lastCheckpoint.y, lastCheckpoint.z);
-      setVelocity({ x: 0, y: -10, z: 0 });
+      // Spawn character properly on the platform (platform top + character height)
+      // Spawn platform is at Y=0 with height 0.5, so top is at Y=0.25
+      // Character needs to be at Y=1.25 to stand on platform
+      groupRef.current.position.set(lastCheckpoint.x, 1.25, lastCheckpoint.z);
+      setVelocity({ x: 0, y: 0, z: 0 }); // No falling velocity
       setIsGrounded(true);
     }
   };
