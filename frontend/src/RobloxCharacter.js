@@ -255,7 +255,8 @@ function RobloxCharacter({ position, onPositionChange, onCheckpointReached }) {
     // Apply movement and character rotation
     if (moveVector.length() > 0) {
       // Calculate the direction the character should face based on movement
-      const targetRotation = Math.atan2(moveVector.x, moveVector.z);
+      // Fix: Use proper atan2 calculation for full 360-degree rotation
+      const targetRotation = Math.atan2(-moveVector.x, -moveVector.z);
       
       // Apply immediate rotation so character faces movement direction
       setCharacterRotation(targetRotation);
