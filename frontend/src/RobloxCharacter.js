@@ -369,91 +369,12 @@ function RobloxCharacter({ position, onPositionChange, onCheckpointReached }) {
       z: currentPos.z + newVelocity.z * delta
     };
 
-    // Collision detection with obby elements
-    let onPlatform = false;
-    const elements = getObbyElements();
-    
-    for (const element of elements) {
-      const [ex, ey, ez] = element.pos;
-      const playerBottom = newPos.y - 0.5; // Character height adjustment
-      
-      // Platform collision (including spawn platform)
-      if (element.type === 'platform' || element.type === 'moving_platform') {
-        if (playerBottom <= ey + element.size[1]/2 + 0.1 && 
-            playerBottom >= ey - element.size[1]/2 - 0.5 && 
-            velocity.y <= 0.1) {
-          
-          const [w, h, d] = element.size;
-          const isOnPlatform = Math.abs(newPos.x - ex) <= w/2 + 0.3 && 
-                              Math.abs(newPos.z - ez) <= d/2 + 0.3;
-          
-          if (isOnPlatform) {
-            newPos.y = ey + element.size[1]/2 + 0.5;
-            newVelocity.y = Math.max(0, newVelocity.y);
-            onPlatform = true;
-            setIsGrounded(true);
-            break;
-          }
-        }
-      }
-      
-      // Checkpoint collision
-      else if (element.type === 'checkpoint') {
-        const distance = Math.sqrt(
-          (newPos.x - ex) ** 2 + (newPos.z - ez) ** 2
-        );
-        if (distance <= 2) {
-          setLastCheckpoint({ x: ex, y: ey + 1, z: ez });
-          if (onCheckpointReached) {
-            onCheckpointReached(currentCheckpoint + 1);
-          }
-          setCurrentCheckpoint(prev => prev + 1);
-        }
-      }
-      
-      // Kill part collision
-      else if (element.type === 'killpart') {
-        const [w, h, d] = element.size;
-        const isTouch = Math.abs(newPos.x - ex) <= w/2 + 0.3 && 
-                       Math.abs(newPos.y - ey) <= h/2 + 0.8 &&
-                       Math.abs(newPos.z - ez) <= d/2 + 0.3;
-        
-        if (isTouch) {
-          respawnPlayer();
-          return;
-        }
-      }
-      
-      // Jump pad collision
-      else if (element.type === 'jumppad') {
-        const [w, h, d] = element.size;
-        const isOnJumpPad = Math.abs(newPos.x - ex) <= w/2 + 0.3 && 
-                           Math.abs(newPos.z - ez) <= d/2 + 0.3 &&
-                           playerBottom <= ey + h/2 + 0.2 && 
-                           playerBottom >= ey - h/2 - 0.2;
-        
-        if (isOnJumpPad && velocity.y <= 0.1) {
-          newVelocity.y = 25; // Super jump
-          setIsGrounded(false);
-        }
-      }
-      
-      // Speed pad collision
-      else if (element.type === 'speedpad') {
-        const [w, h, d] = element.size;
-        const isOnSpeedPad = Math.abs(newPos.x - ex) <= w/2 + 0.3 && 
-                            Math.abs(newPos.z - ez) <= d/2 + 0.3 &&
-                            playerBottom <= ey + h/2 + 0.2 && 
-                            playerBottom >= ey - h/2 - 0.2;
-        
-        if (isOnSpeedPad) {
-          setSpeedBoost(2);
-          setSpeedBoostTimer(3); // 3 seconds of speed boost
-        }
-      }
-    }
-
-    if (!onPlatform && newVelocity.y <= 0) {
+    // Simple collision with ground/spawn platform for now
+    if (newPos.y <= 1) {
+      newPos.y = 1.25;
+      newVelocity.y = Math.max(0, newVelocity.y);
+      setIsGrounded(true);
+    } else {
       setIsGrounded(false);
     }
 
