@@ -22,11 +22,31 @@ function RobloxCharacter({ position, onPositionChange, onCheckpointReached }) {
   const [currentCheckpoint, setCurrentCheckpoint] = useState(0);
   const [speedBoost, setSpeedBoost] = useState(1);
   const [speedBoostTimer, setSpeedBoostTimer] = useState(0);
+  const [cameraOffset, setCameraOffset] = useState({ horizontal: 0, vertical: 0 });
 
-  // Handle keyboard input
+  // Handle keyboard input (including camera controls)
   useEffect(() => {
     const handleKeyDown = (event) => {
       setKeys(prev => ({ ...prev, [event.code]: true }));
+      
+      // Camera controls with Q/E for horizontal rotation
+      if (event.code === 'KeyQ') {
+        setCameraOffset(prev => ({ ...prev, horizontal: prev.horizontal - 0.5 }));
+      }
+      if (event.code === 'KeyE') {
+        setCameraOffset(prev => ({ ...prev, horizontal: prev.horizontal + 0.5 }));
+      }
+      // R/T for vertical adjustment
+      if (event.code === 'KeyR') {
+        setCameraOffset(prev => ({ ...prev, vertical: prev.vertical + 0.5 }));
+      }
+      if (event.code === 'KeyT') {
+        setCameraOffset(prev => ({ ...prev, vertical: prev.vertical - 0.5 }));
+      }
+      // Reset camera with C
+      if (event.code === 'KeyC') {
+        setCameraOffset({ horizontal: 0, vertical: 0 });
+      }
     };
     
     const handleKeyUp = (event) => {
