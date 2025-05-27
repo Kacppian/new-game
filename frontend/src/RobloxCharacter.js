@@ -292,12 +292,97 @@ function RobloxCharacter({ position, onPositionChange, onCheckpointReached }) {
       z: currentPos.z + newVelocity.z * delta
     };
 
-    // Simple collision with spawn platform
-    if (newPos.y <= 0.75) { // Platform top (0.25) + character height (0.5) = 0.75
-      newPos.y = 0.75;
-      newVelocity.y = Math.max(0, newVelocity.y);
-      setIsGrounded(true);
-    } else {
+    // Proper platform collision detection
+    let onPlatform = false;
+    
+    // Check collision with spawn platform first
+    const spawnPlatform = { pos: [0, 0, 0], size: [6, 0.5, 6], type: 'platform' };
+    const playerBottom = newPos.y - 0.5;
+    
+    // Check spawn platform collision
+    if (playerBottom <= spawnPlatform.pos[1] + spawnPlatform.size[1]/2 + 0.1 && 
+        playerBottom >= spawnPlatform.pos[1] - spawnPlatform.size[1]/2 - 0.5 && 
+        newVelocity.y <= 0.1) {
+      
+      const isOnSpawn = Math.abs(newPos.x - spawnPlatform.pos[0]) <= spawnPlatform.size[0]/2 + 0.3 && 
+                       Math.abs(newPos.z - spawnPlatform.pos[2]) <= spawnPlatform.size[2]/2 + 0.3;
+      
+      if (isOnSpawn) {
+        newPos.y = spawnPlatform.pos[1] + spawnPlatform.size[1]/2 + 0.5;
+        newVelocity.y = Math.max(0, newVelocity.y);
+        onPlatform = true;
+        setIsGrounded(true);
+      }
+    }
+    
+    // Check collision with spiral tower platforms
+    if (!onPlatform) {
+      const centerX = 0, centerZ = 0, baseRadius = 8, totalLevels = 50;
+      const heightIncrement = 0.8, platformsPerRotation = 12;
+      
+      for (let level = 0; level < totalLevels; level++) {
+        const angle = (level / platformsPerRotation) * Math.PI * 2;
+        const height = 1.5 + level * heightIncrement;
+        const radius = baseRadius + Math.sin(level * 0.2) * 1;
+        
+        const x = centerX + Math.cos(angle) * radius;
+        const z = centerZ + Math.sin(angle) * radius;
+        
+        let platformSize = [2.5, 0.5, 2.5];
+        if (height < 10) platformSize = [3, 0.5, 3];
+        else if (height < 20) platformSize = [2.5, 0.5, 2.5];
+        else if (height < 30) platformSize = [2, 0.5, 2];
+        else platformSize = [1.8, 0.5, 1.8];
+        
+        // Platform collision check
+        if (playerBottom <= height + platformSize[1]/2 + 0.1 && 
+            playerBottom >= height - platformSize[1]/2 - 0.5 && 
+            newVelocity.y <= 0.1) {
+          
+          const isOnPlatform = Math.abs(newPos.x - x) <= platformSize[0]/2 + 0.3 && 
+                              Math.abs(newPos.z - z) <= platformSize[2]/2 + 0.3;
+          
+          if (isOnPlatform) {
+            newPos.y = height + platformSize[1]/2 + 0.5;
+            newVelocity.y = Math.max(0, newVelocity.y);
+            onPlatform = true;
+            setIsGrounded(true);
+            break;
+          }
+        }
+        
+        // Check bridge platforms
+        if (level % 4 === 1 && level > 0) {
+          const prevAngle = ((level - 1) / platformsPerRotation) * Math.PI * 2;
+          const prevX = centerX + Math.cos(prevAngle) * radius;
+          const prevZ = centerZ + Math.sin(prevAngle) * radius;
+          const prevHeight = 1.5 + (level - 1) * heightIncrement;
+          
+          const bridgeX = (x + prevX) / 2;
+          const bridgeZ = (z + prevZ) / 2;
+          const bridgeHeight = (height + prevHeight) / 2;
+          const bridgeSize = [1.5, 0.5, 1.5];
+          
+          if (playerBottom <= bridgeHeight + bridgeSize[1]/2 + 0.1 && 
+              playerBottom >= bridgeHeight - bridgeSize[1]/2 - 0.5 && 
+              newVelocity.y <= 0.1) {
+            
+            const isOnBridge = Math.abs(newPos.x - bridgeX) <= bridgeSize[0]/2 + 0.3 && 
+                              Math.abs(newPos.z - bridgeZ) <= bridgeSize[2]/2 + 0.3;
+            
+            if (isOnBridge) {
+              newPos.y = bridgeHeight + bridgeSize[1]/2 + 0.5;
+              newVelocity.y = Math.max(0, newVelocity.y);
+              onPlatform = true;
+              setIsGrounded(true);
+              break;
+            }
+          }
+        }
+      }
+    }
+    
+    if (!onPlatform) {
       setIsGrounded(false);
     }
 
