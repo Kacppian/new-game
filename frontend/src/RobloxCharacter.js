@@ -199,44 +199,82 @@ function RobloxCharacter({ position, onPositionChange, onCheckpointReached }) {
     let newVelocity = { ...velocity };
     newVelocity.y += gravity * delta;
 
-    // Handle movement relative to camera orientation
+    // Handle movement with two different control schemes
     let isMoving = false;
-    
-    // Calculate camera direction vectors
-    const horizontalAngle = cameraOffset.horizontal;
-    const cameraForward = new THREE.Vector3(
-      -Math.sin(horizontalAngle),  // Forward X component
-      0,                           // No Y movement for forward
-      -Math.cos(horizontalAngle)   // Forward Z component
-    ).normalize();
-    
-    const cameraRight = new THREE.Vector3(
-      Math.cos(horizontalAngle),   // Right X component
-      0,                           // No Y movement for right
-      -Math.sin(horizontalAngle)   // Right Z component
-    ).normalize();
-    
-    // Movement input relative to camera
     let moveVector = new THREE.Vector3(0, 0, 0);
     
-    if (keys['KeyA'] || keys['ArrowLeft']) {
-      moveVector.add(cameraRight.clone().multiplyScalar(-1)); // Move left
-      isMoving = true;
-    }
-    if (keys['KeyD'] || keys['ArrowRight']) {
-      moveVector.add(cameraRight); // Move right
-      isMoving = true;
-    }
-    if (keys['KeyW'] || keys['ArrowUp']) {
-      moveVector.add(cameraForward); // Move forward
-      isMoving = true;
-    }
-    if (keys['KeyS'] || keys['ArrowDown']) {
-      moveVector.add(cameraForward.clone().multiplyScalar(-1)); // Move backward
-      isMoving = true;
+    // WASD - Camera relative movement
+    if (keys['KeyW'] || keys['KeyA'] || keys['KeyS'] || keys['KeyD']) {
+      // Calculate camera direction vectors
+      const horizontalAngle = cameraOffset.horizontal;
+      const cameraForward = new THREE.Vector3(
+        -Math.sin(horizontalAngle),  // Forward X component
+        0,                           // No Y movement for forward
+        -Math.cos(horizontalAngle)   // Forward Z component
+      ).normalize();
+      
+      const cameraRight = new THREE.Vector3(
+        Math.cos(horizontalAngle),   // Right X component
+        0,                           // No Y movement for right
+        -Math.sin(horizontalAngle)   // Right Z component
+      ).normalize();
+      
+      if (keys['KeyA']) {
+        moveVector.add(cameraRight.clone().multiplyScalar(-1)); // Move left relative to camera
+        isMoving = true;
+      }
+      if (keys['KeyD']) {
+        moveVector.add(cameraRight); // Move right relative to camera
+        isMoving = true;
+      }
+      if (keys['KeyW']) {
+        moveVector.add(cameraForward); // Move forward relative to camera
+        isMoving = true;
+      }
+      if (keys['KeyS']) {
+        moveVector.add(cameraForward.clone().multiplyScalar(-1)); // Move backward relative to camera
+        isMoving = true;
+      }
     }
     
-    // Normalize and apply speed
+    // Arrow Keys - Character facing direction (world coordinates)
+    if (keys['ArrowLeft'] || keys['ArrowRight'] || keys['ArrowUp'] || keys['ArrowDown']) {
+      // Character forward direction (initially facing negative Z)
+      const characterForward = new THREE.Vector3(
+        -Math.sin(characterRotation),
+        0,
+        -Math.cos(characterRotation)
+      ).normalize();
+      
+      const characterRight = new THREE.Vector3(
+        Math.cos(characterRotation),
+        0,
+        -Math.sin(characterRotation)
+      ).normalize();
+      
+      if (keys['ArrowLeft']) {
+        moveVector.add(characterRight.clone().multiplyScalar(-1)); // Move left relative to character
+        // Turn character left
+        setCharacterRotation(prev => prev - 0.05);
+        isMoving = true;
+      }
+      if (keys['ArrowRight']) {
+        moveVector.add(characterRight); // Move right relative to character
+        // Turn character right
+        setCharacterRotation(prev => prev + 0.05);
+        isMoving = true;
+      }
+      if (keys['ArrowUp']) {
+        moveVector.add(characterForward); // Move forward in character's facing direction
+        isMoving = true;
+      }
+      if (keys['ArrowDown']) {
+        moveVector.add(characterForward.clone().multiplyScalar(-1)); // Move backward from character's facing direction
+        isMoving = true;
+      }
+    }
+    
+    // Apply movement
     if (moveVector.length() > 0) {
       moveVector.normalize().multiplyScalar(moveSpeed);
       newVelocity.x = moveVector.x;
