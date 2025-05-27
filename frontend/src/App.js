@@ -64,15 +64,10 @@ function GameUI({ playerPosition, checkpointCount }) {
       <div className="controls-panel roblox-style">
         <h3>🎯 Controls</h3>
         <div className="control-section">
-          <div className="control-header">🔄 Movement Controls:</div>
-          <div className="control-item">🎮 WASD / Arrow Keys - Move & Auto-turn</div>
+          <div className="control-header">🎮 Simple Controls:</div>
+          <div className="control-item">🔄 WASD / Arrow Keys - Move</div>
           <div className="control-item">🚀 Space - Jump</div>
-          <div className="control-note">Character automatically faces movement direction!</div>
-        </div>
-        <div className="control-section">
-          <div className="control-header">📷 Camera Controls:</div>
-          <div className="control-item">🔄 Q/E - Rotate Camera</div>
-          <div className="control-item">🔄 C - Reset Camera</div>
+          <div className="control-note">Easy and straightforward!</div>
         </div>
         <div className="control-section">
           <div className="control-header">🎮 Obby Elements:</div>
