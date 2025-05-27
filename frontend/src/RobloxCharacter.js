@@ -205,25 +205,50 @@ function RobloxCharacter({ position, onPositionChange, onCheckpointReached }) {
     let newVelocity = { ...velocity };
     newVelocity.y += gravity * delta;
 
-    // Handle movement
+    // Handle movement relative to camera orientation
     let isMoving = false;
+    
+    // Calculate camera direction vectors
+    const horizontalAngle = cameraOffset.horizontal;
+    const cameraForward = new THREE.Vector3(
+      -Math.sin(horizontalAngle),  // Forward X component
+      0,                           // No Y movement for forward
+      -Math.cos(horizontalAngle)   // Forward Z component
+    ).normalize();
+    
+    const cameraRight = new THREE.Vector3(
+      Math.cos(horizontalAngle),   // Right X component
+      0,                           // No Y movement for right
+      -Math.sin(horizontalAngle)   // Right Z component
+    ).normalize();
+    
+    // Movement input relative to camera
+    let moveVector = new THREE.Vector3(0, 0, 0);
+    
     if (keys['KeyA'] || keys['ArrowLeft']) {
-      newVelocity.x = -moveSpeed;
+      moveVector.add(cameraRight.clone().multiplyScalar(-1)); // Move left
       isMoving = true;
-    } else if (keys['KeyD'] || keys['ArrowRight']) {
-      newVelocity.x = moveSpeed;
+    }
+    if (keys['KeyD'] || keys['ArrowRight']) {
+      moveVector.add(cameraRight); // Move right
       isMoving = true;
+    }
+    if (keys['KeyW'] || keys['ArrowUp']) {
+      moveVector.add(cameraForward); // Move forward
+      isMoving = true;
+    }
+    if (keys['KeyS'] || keys['ArrowDown']) {
+      moveVector.add(cameraForward.clone().multiplyScalar(-1)); // Move backward
+      isMoving = true;
+    }
+    
+    // Normalize and apply speed
+    if (moveVector.length() > 0) {
+      moveVector.normalize().multiplyScalar(moveSpeed);
+      newVelocity.x = moveVector.x;
+      newVelocity.z = moveVector.z;
     } else {
       newVelocity.x *= 0.8;
-    }
-
-    if (keys['KeyW'] || keys['ArrowUp']) {
-      newVelocity.z = -moveSpeed;
-      isMoving = true;
-    } else if (keys['KeyS'] || keys['ArrowDown']) {
-      newVelocity.z = moveSpeed;
-      isMoving = true;
-    } else {
       newVelocity.z *= 0.8;
     }
 
