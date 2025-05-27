@@ -411,6 +411,7 @@ function RobloxCharacter({ position, onPositionChange, onCheckpointReached }) {
     const verticalOffset = cameraOffset.vertical;
     
     // Camera position relative to player with manual adjustments
+    const horizontalAngle = cameraOffset.horizontal;  // Get the horizontal angle from cameraOffset
     const idealCameraPos = new THREE.Vector3(
       newPos.x + Math.cos(horizontalAngle) * cameraDistance * 0.7,  // Adjustable horizontal position
       newPos.y + cameraHeight + verticalOffset,                     // Adjustable height
