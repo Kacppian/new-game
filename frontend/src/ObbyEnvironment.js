@@ -185,7 +185,7 @@ function ObbyEnvironment() {
     setTime(prev => prev + delta);
   });
 
-  // Generate all obby elements - TOWER STRUCTURE
+  // Generate all obby elements - CONNECTED SPIRAL TOWER
   const getObbyElements = () => {
     const elements = [];
     
@@ -193,59 +193,56 @@ function ObbyEnvironment() {
     elements.push({ 
       type: 'platform', 
       pos: [0, 0, 0], 
-      size: [8, 0.5, 8], 
+      size: [6, 0.5, 6], 
       color: '#90EE90',
       material: 'spawn'
     });
     
-    // Welcome sign
+    // Welcome sign (not blocking)
     elements.push({ 
       type: 'platform', 
-      pos: [0, 3, -6], 
-      size: [6, 3, 0.5], 
+      pos: [0, 3, -8], 
+      size: [4, 2, 0.5], 
       color: '#8B4513',
       material: 'sign'
     });
     
-    // Tower parameters
+    // Tower parameters for spiral path
     const centerX = 0;
     const centerZ = 0;
-    const towerRadius = 12;
-    const levelsPerFloor = 8; // Platforms per level around the tower
-    const heightPerLevel = 3;
-    const totalLevels = 40; // Total climbing platforms
+    const baseRadius = 8;
+    const totalLevels = 50;
+    const heightIncrement = 0.8; // Smaller height increments for easier climbing
+    const platformsPerRotation = 12; // More platforms per rotation for easier jumps
     
-    // Generate spiral tower platforms
+    // Create connected spiral path
     for (let level = 0; level < totalLevels; level++) {
-      const angle = (level / levelsPerFloor) * Math.PI * 2;
-      const height = 2 + level * (heightPerLevel / levelsPerFloor);
-      const radius = towerRadius + Math.sin(level * 0.3) * 2; // Varying radius for difficulty
+      const angle = (level / platformsPerRotation) * Math.PI * 2;
+      const height = 1.5 + level * heightIncrement;
+      const radius = baseRadius + Math.sin(level * 0.2) * 1; // Slight radius variation
       
       const x = centerX + Math.cos(angle) * radius;
       const z = centerZ + Math.sin(angle) * radius;
       
-      // Determine platform type and difficulty based on height
+      // Platform size and color based on difficulty
+      let platformSize = [2.5, 0.5, 2.5];
       let platformColor = '#87CEEB';
-      let platformSize = [3, 0.5, 3];
       
-      if (height < 8) {
-        // Lower levels - easy
-        platformColor = '#87CEEB';
+      if (height < 10) {
         platformSize = [3, 0.5, 3];
-      } else if (height < 16) {
-        // Mid levels - medium
-        platformColor = '#FFB6C1';
+        platformColor = '#87CEEB'; // Light blue - easy
+      } else if (height < 20) {
         platformSize = [2.5, 0.5, 2.5];
-      } else if (height < 24) {
-        // Higher levels - hard
-        platformColor = '#DDA0DD';
+        platformColor = '#FFB6C1'; // Pink - medium
+      } else if (height < 30) {
         platformSize = [2, 0.5, 2];
+        platformColor = '#DDA0DD'; // Plum - hard
       } else {
-        // Top levels - very hard
-        platformColor = '#FF6347';
-        platformSize = [1.5, 0.5, 1.5];
+        platformSize = [1.8, 0.5, 1.8];
+        platformColor = '#FF6347'; // Red - very hard
       }
       
+      // Main spiral platform
       elements.push({
         type: 'platform',
         pos: [x, height, z],
@@ -253,9 +250,9 @@ function ObbyEnvironment() {
         color: platformColor
       });
       
-      // Add obstacles and special elements periodically
-      if (level % 4 === 0 && level > 0) {
-        // Checkpoints every 4 levels
+      // Add varied obstacles and features
+      if (level === 3) {
+        // First checkpoint after a few platforms
         elements.push({
           type: 'checkpoint',
           pos: [x, height + 2, z],
@@ -263,77 +260,100 @@ function ObbyEnvironment() {
         });
       }
       
-      if (level % 6 === 2) {
-        // Moving platforms
+      if (level % 8 === 5) {
+        // Checkpoints every 8 levels
+        elements.push({
+          type: 'checkpoint',
+          pos: [x, height + 2, z],
+          size: [1.5, 4, 0.5]
+        });
+      }
+      
+      if (level % 7 === 2 && level > 5) {
+        // Jump pads for fun vertical movement
+        const jumpX = centerX + Math.cos(angle + 0.3) * (radius - 2);
+        const jumpZ = centerZ + Math.sin(angle + 0.3) * (radius - 2);
+        elements.push({
+          type: 'jumppad',
+          pos: [jumpX, height, jumpZ],
+          size: [1.5, 0.5, 1.5]
+        });
+      }
+      
+      if (level % 9 === 4 && level > 8) {
+        // Moving platforms for dynamic challenge
+        const moveX = centerX + Math.cos(angle - 0.5) * (radius + 3);
+        const moveZ = centerZ + Math.sin(angle - 0.5) * (radius + 3);
         elements.push({
           type: 'moving_platform',
-          pos: [x + 4, height + 1.5, z],
+          pos: [moveX, height + 1, moveZ],
           size: [2, 0.5, 2],
           color: '#DDA0DD',
           moveType: 'horizontal',
-          moveRange: 3
+          moveRange: 2
         });
       }
       
-      if (level % 8 === 4) {
-        // Jump pads
-        elements.push({
-          type: 'jumppad',
-          pos: [x, height + 3, z + 3],
-          size: [2, 0.5, 2]
-        });
-      }
-      
-      if (level % 10 === 6) {
-        // Speed pads
+      if (level % 11 === 7 && level > 10) {
+        // Speed pads for fast movement
+        const speedX = centerX + Math.cos(angle + 0.8) * (radius - 1);
+        const speedZ = centerZ + Math.sin(angle + 0.8) * (radius - 1);
         elements.push({
           type: 'speedpad',
-          pos: [x - 2, height, z + 2],
-          size: [2, 0.5, 2]
+          pos: [speedX, height, speedZ],
+          size: [1.5, 0.5, 1.5]
         });
       }
       
-      if (level % 12 === 8 && level > 12) {
-        // Kill parts (danger zones)
+      if (level % 13 === 9 && level > 15) {
+        // Occasional kill parts for danger
+        const killX = centerX + Math.cos(angle - 0.8) * (radius + 1);
+        const killZ = centerZ + Math.sin(angle - 0.8) * (radius + 1);
         elements.push({
           type: 'killpart',
-          pos: [x + 2, height + 0.3, z - 2],
+          pos: [killX, height + 0.3, killZ],
           size: [1, 0.6, 1]
         });
       }
       
-      if (level % 15 === 10 && level > 15) {
-        // Spinning obstacles
+      if (level % 15 === 12 && level > 18) {
+        // Spinning obstacles for advanced challenge
         elements.push({
           type: 'spinner',
-          pos: [x, height + 2, z],
-          size: [6, 0.5, 1],
+          pos: [x, height + 1.5, z],
+          size: [4, 0.5, 0.8],
           color: '#FF6347',
-          spinSpeed: 0.02
+          spinSpeed: 0.03
+        });
+      }
+      
+      // Add extra connecting platforms for easier jumps every few levels
+      if (level % 4 === 1 && level > 0) {
+        const prevAngle = ((level - 1) / platformsPerRotation) * Math.PI * 2;
+        const prevX = centerX + Math.cos(prevAngle) * radius;
+        const prevZ = centerZ + Math.sin(prevAngle) * radius;
+        const prevHeight = 1.5 + (level - 1) * heightIncrement;
+        
+        // Bridge platform between spiral sections
+        const bridgeX = (x + prevX) / 2;
+        const bridgeZ = (z + prevZ) / 2;
+        const bridgeHeight = (height + prevHeight) / 2;
+        
+        elements.push({
+          type: 'platform',
+          pos: [bridgeX, bridgeHeight, bridgeZ],
+          size: [1.5, 0.5, 1.5],
+          color: '#98FB98' // Light green for helper platforms
         });
       }
     }
     
-    // Central tower support columns (visual)
-    for (let i = 0; i < 4; i++) {
-      const angle = (i / 4) * Math.PI * 2;
-      const x = centerX + Math.cos(angle) * 4;
-      const z = centerZ + Math.sin(angle) * 4;
-      
-      elements.push({
-        type: 'platform',
-        pos: [x, 25, z],
-        size: [1, 50, 1],
-        color: '#696969'
-      });
-    }
-    
     // Final victory platform at the top
-    const finalHeight = 2 + totalLevels * (heightPerLevel / levelsPerFloor) + 5;
+    const finalHeight = 1.5 + totalLevels * heightIncrement + 3;
     elements.push({ 
       type: 'platform', 
       pos: [0, finalHeight, 0], 
-      size: [8, 1, 8], 
+      size: [6, 1, 6], 
       color: '#FFD700',
       material: 'victory'
     });
@@ -341,8 +361,8 @@ function ObbyEnvironment() {
     // Victory sign
     elements.push({ 
       type: 'platform', 
-      pos: [0, finalHeight + 6, 0], 
-      size: [10, 4, 0.5], 
+      pos: [0, finalHeight + 4, 0], 
+      size: [8, 3, 0.5], 
       color: '#8B4513',
       material: 'sign'
     });
