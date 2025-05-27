@@ -223,7 +223,7 @@ function RobloxCharacter({ position, onPositionChange, onCheckpointReached }) {
     
     // Calculate right vector (perpendicular to camera direction)
     const cameraRight = new THREE.Vector3();
-    cameraRight.crossVectors(camera.up, cameraDirection).normalize();
+    cameraRight.crossVectors(cameraDirection, camera.up).normalize(); // Swapped order to fix left/right
     
     // WASD movement relative to camera orientation
     if (keys['KeyW']) {
