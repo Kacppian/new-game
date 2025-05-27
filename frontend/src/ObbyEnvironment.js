@@ -383,15 +383,14 @@ function ObbyEnvironment() {
         🎉 VICTORY! 🎉{'\n'}You reached{'\n'}the top!
       </Text>
       
-      {/* Atmospheric elements */}
-      {/* Add some floating decorative elements */}
-      {Array.from({ length: 20 }, (_, i) => (
+      {/* Atmospheric elements - Spiral around tower */}
+      {Array.from({ length: 30 }, (_, i) => (
         <Box
           key={`deco-${i}`}
           position={[
-            Math.sin(i * 2) * 20,
-            10 + Math.cos(i * 3) * 15,
-            i * 8 - 10
+            Math.cos(i * 0.8) * (15 + i * 0.3),
+            5 + i * 1.2,
+            Math.sin(i * 0.8) * (15 + i * 0.3)
           ]}
           args={[0.5, 0.5, 0.5]}
           castShadow
