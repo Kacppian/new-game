@@ -215,38 +215,40 @@ function RobloxCharacter({ position, onPositionChange, onCheckpointReached }) {
     let isMoving = false;
     let moveVector = new THREE.Vector3(0, 0, 0);
     
-    // Calculate camera direction vectors based on camera rotation
+    // Get the camera's current horizontal rotation angle
     const cameraHorizontalAngle = cameraRotation.horizontal;
     
-    // Camera's forward direction (where camera is looking) - FIXED
+    // Calculate where the camera is positioned relative to character
+    // Camera is at: character + (cos(angle), height, sin(angle)) * distance
+    // So camera forward (W) should move AWAY from camera position
     const cameraForward = new THREE.Vector3(
-      Math.sin(cameraHorizontalAngle),   // X component
-      0,                                 // Y component (no vertical movement)
-      Math.cos(cameraHorizontalAngle)    // Z component
+      -Math.cos(cameraHorizontalAngle),  // Opposite of camera X offset
+      0,                                 // No Y movement
+      -Math.sin(cameraHorizontalAngle)   // Opposite of camera Z offset
     ).normalize();
     
-    // Camera's right direction (perpendicular to forward) - FIXED
+    // Camera right is perpendicular to forward (90 degrees rotated)
     const cameraRight = new THREE.Vector3(
-      Math.cos(cameraHorizontalAngle),   // X component
-      0,                                 // Y component
-      -Math.sin(cameraHorizontalAngle)   // Z component
+      Math.sin(cameraHorizontalAngle),   // Perpendicular to forward X
+      0,                                 // No Y movement  
+      -Math.cos(cameraHorizontalAngle)   // Perpendicular to forward Z
     ).normalize();
     
     // WASD movement relative to camera orientation
     if (keys['KeyW']) {
-      moveVector.add(cameraForward); // Forward relative to camera
+      moveVector.add(cameraForward); // Move away from camera (forward into scene)
       isMoving = true;
     }
     if (keys['KeyS']) {
-      moveVector.add(cameraForward.clone().multiplyScalar(-1)); // Backward relative to camera
+      moveVector.add(cameraForward.clone().multiplyScalar(-1)); // Move toward camera (backward)
       isMoving = true;
     }
     if (keys['KeyA']) {
-      moveVector.add(cameraRight.clone().multiplyScalar(-1)); // Left relative to camera
+      moveVector.add(cameraRight.clone().multiplyScalar(-1)); // Move left relative to camera
       isMoving = true;
     }
     if (keys['KeyD']) {
-      moveVector.add(cameraRight); // Right relative to camera
+      moveVector.add(cameraRight); // Move right relative to camera
       isMoving = true;
     }
     
