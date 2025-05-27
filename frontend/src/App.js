@@ -99,7 +99,7 @@ function GameUI({ playerPosition, checkpointCount }) {
 
 // Main App Component
 function App() {
-  const [playerPosition, setPlayerPosition] = useState({ x: 0, y: 2, z: 0 });
+  const [playerPosition, setPlayerPosition] = useState({ x: 0, y: 1.25, z: 0 });
   const [checkpointCount, setCheckpointCount] = useState(0);
 
   const handlePositionChange = (position) => {
