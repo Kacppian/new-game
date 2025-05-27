@@ -211,39 +211,49 @@ function RobloxCharacter({ position, onPositionChange, onCheckpointReached }) {
     let newVelocity = { ...velocity };
     newVelocity.y += gravity * delta;
 
-    // Handle movement - WASD only for character movement
+    // Handle movement - WASD relative to camera direction
     let isMoving = false;
     let moveVector = new THREE.Vector3(0, 0, 0);
-    let targetRotation = characterRotation;
     
-    // WASD - Simple world direction movement
+    // Calculate camera direction vectors based on camera rotation
+    const cameraHorizontalAngle = cameraRotation.horizontal;
+    
+    // Camera's forward direction (where camera is looking)
+    const cameraForward = new THREE.Vector3(
+      -Math.sin(cameraHorizontalAngle),
+      0,
+      -Math.cos(cameraHorizontalAngle)
+    ).normalize();
+    
+    // Camera's right direction (perpendicular to forward)
+    const cameraRight = new THREE.Vector3(
+      Math.cos(cameraHorizontalAngle),
+      0,
+      -Math.sin(cameraHorizontalAngle)
+    ).normalize();
+    
+    // WASD movement relative to camera orientation
     if (keys['KeyW']) {
-      moveVector.z = -1; // Forward (negative Z is forward in 3D)
-      targetRotation = 0; // Face forward
+      moveVector.add(cameraForward); // Forward relative to camera
       isMoving = true;
     }
     if (keys['KeyS']) {
-      moveVector.z = 1; // Backward
-      targetRotation = Math.PI; // Face backward
+      moveVector.add(cameraForward.clone().multiplyScalar(-1)); // Backward relative to camera
       isMoving = true;
     }
     if (keys['KeyA']) {
-      moveVector.x = -1; // Left
-      targetRotation = Math.PI / 2; // Face left
+      moveVector.add(cameraRight.clone().multiplyScalar(-1)); // Left relative to camera
       isMoving = true;
     }
     if (keys['KeyD']) {
-      moveVector.x = 1; // Right
-      targetRotation = -Math.PI / 2; // Face right
+      moveVector.add(cameraRight); // Right relative to camera
       isMoving = true;
     }
     
-    // Handle diagonal movement and rotation
+    // Apply movement and character rotation
     if (moveVector.length() > 0) {
-      // For diagonal movement, calculate the angle
-      if (moveVector.x !== 0 && moveVector.z !== 0) {
-        targetRotation = Math.atan2(moveVector.x, -moveVector.z);
-      }
+      // Calculate the direction the character should face based on movement
+      const targetRotation = Math.atan2(moveVector.x, -moveVector.z);
       
       // Smooth character rotation towards movement direction
       const rotationDiff = targetRotation - characterRotation;
