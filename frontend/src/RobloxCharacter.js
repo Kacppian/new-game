@@ -239,37 +239,34 @@ function RobloxCharacter({ position, onPositionChange, onCheckpointReached }) {
     
     // Arrow Keys - Character facing direction (world coordinates)
     if (keys['ArrowLeft'] || keys['ArrowRight'] || keys['ArrowUp'] || keys['ArrowDown']) {
-      // Character forward direction (initially facing negative Z, which is "forward" in 3D space)
-      const characterForward = new THREE.Vector3(
-        Math.sin(characterRotation),   // Forward X component (corrected)
-        0,
-        Math.cos(characterRotation)    // Forward Z component (corrected)
-      ).normalize();
-      
-      const characterRight = new THREE.Vector3(
-        Math.cos(characterRotation),   // Right X component
-        0,
-        -Math.sin(characterRotation)   // Right Z component
-      ).normalize();
-      
       if (keys['ArrowLeft']) {
-        moveVector.add(characterRight.clone().multiplyScalar(-1)); // Move left relative to character
-        // Turn character left
+        // Just turn character left, no movement
         setCharacterRotation(prev => prev - 0.05);
         isMoving = true;
       }
       if (keys['ArrowRight']) {
-        moveVector.add(characterRight); // Move right relative to character
-        // Turn character right
+        // Just turn character right, no movement  
         setCharacterRotation(prev => prev + 0.05);
         isMoving = true;
       }
       if (keys['ArrowUp']) {
-        moveVector.add(characterForward); // Move forward in character's facing direction
+        // Move forward in character's current facing direction
+        const characterForward = new THREE.Vector3(
+          Math.sin(characterRotation),   // Forward X component
+          0,
+          Math.cos(characterRotation)    // Forward Z component  
+        ).normalize();
+        moveVector.add(characterForward);
         isMoving = true;
       }
       if (keys['ArrowDown']) {
-        moveVector.add(characterForward.clone().multiplyScalar(-1)); // Move backward from character's facing direction
+        // Move backward from character's current facing direction
+        const characterForward = new THREE.Vector3(
+          Math.sin(characterRotation),   // Forward X component
+          0,
+          Math.cos(characterRotation)    // Forward Z component
+        ).normalize();
+        moveVector.add(characterForward.clone().multiplyScalar(-1));
         isMoving = true;
       }
     }
