@@ -402,16 +402,16 @@ function RobloxCharacter({ position, onPositionChange, onCheckpointReached }) {
       onPositionChange(newPos);
     }
 
-    // Improved camera system with manual controls
+    // Improved camera system with manual controls (no movement prediction)
     const cameraDistance = 8;  // Closer to player
     const cameraHeight = 6;    // Lower height for better view
     const cameraSpeed = 0.08;  // Faster follow for responsiveness
     
     // Apply manual camera offsets
+    const horizontalAngle = cameraOffset.horizontal;
     const verticalOffset = cameraOffset.vertical;
     
     // Camera position relative to player with manual adjustments
-    const horizontalAngle = cameraOffset.horizontal;  // Get the horizontal angle from cameraOffset
     const idealCameraPos = new THREE.Vector3(
       newPos.x + Math.cos(horizontalAngle) * cameraDistance * 0.7,  // Adjustable horizontal position
       newPos.y + cameraHeight + verticalOffset,                     // Adjustable height
@@ -421,14 +421,8 @@ function RobloxCharacter({ position, onPositionChange, onCheckpointReached }) {
     // Smooth camera movement with better responsiveness
     camera.position.lerp(idealCameraPos, cameraSpeed);
     
-    // Look slightly ahead of the player in the direction they're moving
-    const lookTarget = new THREE.Vector3(
-      newPos.x + newVelocity.x * 0.3,  // Look ahead based on movement
-      newPos.y + 2,                    // Look slightly above player
-      newPos.z + newVelocity.z * 0.3   // Look ahead based on movement
-    );
-    
-    camera.lookAt(lookTarget);
+    // Look at player position (no prediction movement)
+    camera.lookAt(newPos.x, newPos.y + 2, newPos.z);
   });
 
   return (
