@@ -23,11 +23,26 @@ function RobloxCharacter({ position, onPositionChange, onCheckpointReached }) {
   const [speedBoost, setSpeedBoost] = useState(1);
   const [speedBoostTimer, setSpeedBoostTimer] = useState(0);
   const [characterRotation, setCharacterRotation] = useState(0);
+  const [cameraRotation, setCameraRotation] = useState({ horizontal: 0, vertical: 0 });
 
-  // Simple keyboard input
+  // Handle keyboard input - Arrow keys for camera, WASD for movement
   useEffect(() => {
     const handleKeyDown = (event) => {
       setKeys(prev => ({ ...prev, [event.code]: true }));
+      
+      // Arrow keys control camera rotation
+      if (event.code === 'ArrowLeft') {
+        setCameraRotation(prev => ({ ...prev, horizontal: prev.horizontal - 0.1 }));
+      }
+      if (event.code === 'ArrowRight') {
+        setCameraRotation(prev => ({ ...prev, horizontal: prev.horizontal + 0.1 }));
+      }
+      if (event.code === 'ArrowUp') {
+        setCameraRotation(prev => ({ ...prev, vertical: Math.min(1, prev.vertical + 0.1) }));
+      }
+      if (event.code === 'ArrowDown') {
+        setCameraRotation(prev => ({ ...prev, vertical: Math.max(-1, prev.vertical - 0.1) }));
+      }
     };
     
     const handleKeyUp = (event) => {
