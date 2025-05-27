@@ -376,16 +376,20 @@ function RobloxCharacter({ position, onPositionChange, onCheckpointReached }) {
       onPositionChange(newPos);
     }
 
-    // Simple fixed camera system
+    // Camera system controlled by arrow keys
     const cameraDistance = 8;
     const cameraHeight = 6;
     const cameraSpeed = 0.08;
     
-    // Fixed camera position - no manual controls
+    // Apply camera rotation from arrow keys
+    const horizontalAngle = cameraRotation.horizontal;
+    const verticalOffset = cameraRotation.vertical * 3; // Scale vertical movement
+    
+    // Camera position with arrow key controls
     const idealCameraPos = new THREE.Vector3(
-      newPos.x + cameraDistance * 0.7,  // Behind and to the side
-      newPos.y + cameraHeight,          // Above the player
-      newPos.z + cameraDistance * 0.7   // Diagonal view
+      newPos.x + Math.cos(horizontalAngle) * cameraDistance * 0.7,
+      newPos.y + cameraHeight + verticalOffset,
+      newPos.z + Math.sin(horizontalAngle) * cameraDistance * 0.7
     );
     
     // Smooth camera follow
