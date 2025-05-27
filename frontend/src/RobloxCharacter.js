@@ -218,18 +218,18 @@ function RobloxCharacter({ position, onPositionChange, onCheckpointReached }) {
     // Calculate camera direction vectors based on camera rotation
     const cameraHorizontalAngle = cameraRotation.horizontal;
     
-    // Camera's forward direction (where camera is looking)
+    // Camera's forward direction (where camera is looking) - FIXED
     const cameraForward = new THREE.Vector3(
-      -Math.sin(cameraHorizontalAngle),
-      0,
-      -Math.cos(cameraHorizontalAngle)
+      Math.sin(cameraHorizontalAngle),   // X component
+      0,                                 // Y component (no vertical movement)
+      Math.cos(cameraHorizontalAngle)    // Z component
     ).normalize();
     
-    // Camera's right direction (perpendicular to forward)
+    // Camera's right direction (perpendicular to forward) - FIXED
     const cameraRight = new THREE.Vector3(
-      Math.cos(cameraHorizontalAngle),
-      0,
-      -Math.sin(cameraHorizontalAngle)
+      Math.cos(cameraHorizontalAngle),   // X component
+      0,                                 // Y component
+      -Math.sin(cameraHorizontalAngle)   // Z component
     ).normalize();
     
     // WASD movement relative to camera orientation
@@ -253,7 +253,7 @@ function RobloxCharacter({ position, onPositionChange, onCheckpointReached }) {
     // Apply movement and character rotation
     if (moveVector.length() > 0) {
       // Calculate the direction the character should face based on movement
-      const targetRotation = Math.atan2(moveVector.x, -moveVector.z);
+      const targetRotation = Math.atan2(moveVector.x, moveVector.z);
       
       // Smooth character rotation towards movement direction
       const rotationDiff = targetRotation - characterRotation;
