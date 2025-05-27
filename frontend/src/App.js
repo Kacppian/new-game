@@ -65,12 +65,9 @@ function GameUI({ playerPosition, checkpointCount }) {
         <h3>🎯 Controls</h3>
         <div className="control-section">
           <div className="control-header">🔄 Movement Controls:</div>
-          <div className="control-item">🎮 WASD - Move relative to camera</div>
-          <div className="control-item">⬆️ Up Arrow - Move forward</div>
-          <div className="control-item">⬇️ Down Arrow - Move backward</div>
-          <div className="control-item">⬅️ Left Arrow - Turn left</div>
-          <div className="control-item">➡️ Right Arrow - Turn right</div>
+          <div className="control-item">🎮 WASD / Arrow Keys - Move & Auto-turn</div>
           <div className="control-item">🚀 Space - Jump</div>
+          <div className="control-note">Character automatically faces movement direction!</div>
         </div>
         <div className="control-section">
           <div className="control-header">📷 Camera Controls:</div>
