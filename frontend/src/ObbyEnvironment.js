@@ -208,7 +208,7 @@ function ObbyEnvironment() {
     });
     
     // Checkpoint 1: Simple jumps
-    elements.push({ type: 'checkpoint', pos: [0, 1, 8], size: [2, 4, 0.5] });
+    elements.push({ type: 'checkpoint', pos: [0, 0, 0], size: [2, 4, 0.5] });
     elements.push({ type: 'platform', pos: [0, 2, 12], size: [3, 0.5, 3], color: '#87CEEB' });
     elements.push({ type: 'platform', pos: [4, 3, 16], size: [2, 0.5, 2], color: '#87CEEB' });
     elements.push({ type: 'platform', pos: [-4, 4, 20], size: [2, 0.5, 2], color: '#87CEEB' });

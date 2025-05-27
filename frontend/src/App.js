@@ -61,7 +61,7 @@ function GameUI({ playerPosition, checkpointCount }) {
         </div>
       </div>
       
-      <div className="controls-panel roblox-style">
+      {/* <div className="controls-panel roblox-style">
         <h3>🎯 Controls</h3>
         <div className="control-section">
           <div className="control-header">🎮 Character Movement:</div>
@@ -84,7 +84,7 @@ function GameUI({ playerPosition, checkpointCount }) {
           <div className="control-item">🟠 Orange - Moving/Spinning</div>
         </div>
         <div className="goal">🏆 Goal: Reach the golden platform!</div>
-      </div>
+      </div> */}
       
       {progress >= 100 && (
         <div className="victory-message">
@@ -99,7 +99,7 @@ function GameUI({ playerPosition, checkpointCount }) {
 
 // Main App Component
 function App() {
-  const [playerPosition, setPlayerPosition] = useState({ x: 0, y: 1.25, z: 0 });
+  const [playerPosition, setPlayerPosition] = useState({ x: 0, y: 0, z: 0 });
   const [checkpointCount, setCheckpointCount] = useState(0);
 
   const handlePositionChange = (position) => {
@@ -163,7 +163,7 @@ function App() {
         {/* Game Elements */}
         <ObbyEnvironment />
         <RobloxCharacter 
-          position={[0, 1.25, 0]} 
+          position={[0, 0, 0]} 
           onPositionChange={handlePositionChange}
           onCheckpointReached={handleCheckpointReached}
         />

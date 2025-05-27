@@ -18,7 +18,7 @@ function RobloxCharacter({ position, onPositionChange, onCheckpointReached }) {
   const [velocity, setVelocity] = useState({ x: 0, y: 0, z: 0 });
   const [isGrounded, setIsGrounded] = useState(false);
   const [keys, setKeys] = useState({});
-  const [lastCheckpoint, setLastCheckpoint] = useState({ x: 0, y: 1.25, z: 0 });
+  const [lastCheckpoint, setLastCheckpoint] = useState({ x: 0, y: 0, z: 0 });
   const [currentCheckpoint, setCurrentCheckpoint] = useState(0);
   const [speedBoost, setSpeedBoost] = useState(1);
   const [speedBoostTimer, setSpeedBoostTimer] = useState(0);
@@ -82,7 +82,7 @@ function RobloxCharacter({ position, onPositionChange, onCheckpointReached }) {
     });
     
     // Checkpoint 1: Simple jumps
-    elements.push({ type: 'checkpoint', pos: [0, 1, 8], size: [2, 4, 0.5] });
+    elements.push({ type: 'checkpoint', pos: [0, 0, 8], size: [2, 4, 0.5] });
     elements.push({ type: 'platform', pos: [0, 2, 12], size: [3, 0.5, 3], color: '#87CEEB' });
     elements.push({ type: 'platform', pos: [4, 3, 16], size: [2, 0.5, 2], color: '#87CEEB' });
     elements.push({ type: 'platform', pos: [-4, 4, 20], size: [2, 0.5, 2], color: '#87CEEB' });
@@ -169,7 +169,7 @@ function RobloxCharacter({ position, onPositionChange, onCheckpointReached }) {
   const respawnPlayer = () => {
     if (groupRef.current) {
       groupRef.current.position.set(lastCheckpoint.x, lastCheckpoint.y, lastCheckpoint.z);
-      setVelocity({ x: 0, y: 0, z: 0 });
+      setVelocity({ x: 0, y: -10, z: 0 });
       setIsGrounded(true);
     }
   };
