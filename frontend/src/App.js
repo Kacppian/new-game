@@ -163,7 +163,7 @@ function App() {
         {/* Game Elements */}
         <ObbyEnvironment />
         <RobloxCharacter 
-          position={[0, 1.25, 0]} 
+          position={[0, 0.75, 0]} 
           onPositionChange={handlePositionChange}
           onCheckpointReached={handleCheckpointReached}
         />
