@@ -185,15 +185,15 @@ function ObbyEnvironment() {
     setTime(prev => prev + delta);
   });
 
-  // Generate all obby elements
+  // Generate all obby elements - TOWER STRUCTURE
   const getObbyElements = () => {
     const elements = [];
     
-    // Spawn area - large safe platform
+    // Central spawn area - large safe platform
     elements.push({ 
       type: 'platform', 
       pos: [0, 0, 0], 
-      size: [12, 0.5, 12], 
+      size: [8, 0.5, 8], 
       color: '#90EE90',
       material: 'spawn'
     });
@@ -201,102 +201,139 @@ function ObbyEnvironment() {
     // Welcome sign
     elements.push({ 
       type: 'platform', 
-      pos: [0, 3, -8], 
-      size: [8, 4, 0.5], 
+      pos: [0, 3, -6], 
+      size: [6, 3, 0.5], 
       color: '#8B4513',
       material: 'sign'
     });
     
-    // Checkpoint 1: Simple jumps
-    elements.push({ type: 'checkpoint', pos: [0, 0, 0], size: [2, 4, 0.5] });
-    elements.push({ type: 'platform', pos: [0, 2, 12], size: [3, 0.5, 3], color: '#87CEEB' });
-    elements.push({ type: 'platform', pos: [4, 3, 16], size: [2, 0.5, 2], color: '#87CEEB' });
-    elements.push({ type: 'platform', pos: [-4, 4, 20], size: [2, 0.5, 2], color: '#87CEEB' });
+    // Tower parameters
+    const centerX = 0;
+    const centerZ = 0;
+    const towerRadius = 12;
+    const levelsPerFloor = 8; // Platforms per level around the tower
+    const heightPerLevel = 3;
+    const totalLevels = 40; // Total climbing platforms
     
-    // Stage 1: Basic parkour (floors 1-2)
-    for (let i = 0; i < 6; i++) {
-      const x = (i % 2 === 0) ? -3 : 3;
-      const z = 24 + i * 4;
-      const y = 5 + i * 0.5;
-      elements.push({ 
-        type: 'platform', 
-        pos: [x, y, z], 
-        size: [2, 0.5, 2], 
-        color: '#FFB6C1' 
-      });
-    }
-    
-    // Checkpoint 2: After basic jumps
-    elements.push({ type: 'checkpoint', pos: [0, 8, 48], size: [2, 4, 0.5] });
-    
-    // Stage 2: Kill parts and precision (floors 3-4)
-    elements.push({ type: 'platform', pos: [0, 9, 52], size: [4, 0.5, 4], color: '#90EE90' });
-    
-    // Kill parts maze - more challenging
-    for (let i = 0; i < 8; i++) {
-      const x = -6 + i * 1.5;
-      elements.push({ type: 'killpart', pos: [x, 9.3, 56], size: [1, 0.6, 1] });
-      elements.push({ type: 'platform', pos: [x, 9, 58], size: [1, 0.5, 1], color: '#87CEEB' });
+    // Generate spiral tower platforms
+    for (let level = 0; level < totalLevels; level++) {
+      const angle = (level / levelsPerFloor) * Math.PI * 2;
+      const height = 2 + level * (heightPerLevel / levelsPerFloor);
+      const radius = towerRadius + Math.sin(level * 0.3) * 2; // Varying radius for difficulty
       
-      // Add some safe platforms between kill parts
-      if (i % 2 === 1) {
-        elements.push({ type: 'platform', pos: [x - 0.7, 9, 57], size: [0.8, 0.5, 0.8], color: '#90EE90' });
+      const x = centerX + Math.cos(angle) * radius;
+      const z = centerZ + Math.sin(angle) * radius;
+      
+      // Determine platform type and difficulty based on height
+      let platformColor = '#87CEEB';
+      let platformSize = [3, 0.5, 3];
+      
+      if (height < 8) {
+        // Lower levels - easy
+        platformColor = '#87CEEB';
+        platformSize = [3, 0.5, 3];
+      } else if (height < 16) {
+        // Mid levels - medium
+        platformColor = '#FFB6C1';
+        platformSize = [2.5, 0.5, 2.5];
+      } else if (height < 24) {
+        // Higher levels - hard
+        platformColor = '#DDA0DD';
+        platformSize = [2, 0.5, 2];
+      } else {
+        // Top levels - very hard
+        platformColor = '#FF6347';
+        platformSize = [1.5, 0.5, 1.5];
+      }
+      
+      elements.push({
+        type: 'platform',
+        pos: [x, height, z],
+        size: platformSize,
+        color: platformColor
+      });
+      
+      // Add obstacles and special elements periodically
+      if (level % 4 === 0 && level > 0) {
+        // Checkpoints every 4 levels
+        elements.push({
+          type: 'checkpoint',
+          pos: [x, height + 2, z],
+          size: [1.5, 4, 0.5]
+        });
+      }
+      
+      if (level % 6 === 2) {
+        // Moving platforms
+        elements.push({
+          type: 'moving_platform',
+          pos: [x + 4, height + 1.5, z],
+          size: [2, 0.5, 2],
+          color: '#DDA0DD',
+          moveType: 'horizontal',
+          moveRange: 3
+        });
+      }
+      
+      if (level % 8 === 4) {
+        // Jump pads
+        elements.push({
+          type: 'jumppad',
+          pos: [x, height + 3, z + 3],
+          size: [2, 0.5, 2]
+        });
+      }
+      
+      if (level % 10 === 6) {
+        // Speed pads
+        elements.push({
+          type: 'speedpad',
+          pos: [x - 2, height, z + 2],
+          size: [2, 0.5, 2]
+        });
+      }
+      
+      if (level % 12 === 8 && level > 12) {
+        // Kill parts (danger zones)
+        elements.push({
+          type: 'killpart',
+          pos: [x + 2, height + 0.3, z - 2],
+          size: [1, 0.6, 1]
+        });
+      }
+      
+      if (level % 15 === 10 && level > 15) {
+        // Spinning obstacles
+        elements.push({
+          type: 'spinner',
+          pos: [x, height + 2, z],
+          size: [6, 0.5, 1],
+          color: '#FF6347',
+          spinSpeed: 0.02
+        });
       }
     }
     
-    // Stage 3: Moving platforms (floors 5-6)
-    elements.push({ type: 'checkpoint', pos: [0, 10, 64], size: [2, 4, 0.5] });
-    for (let i = 0; i < 5; i++) {
-      elements.push({ 
-        type: 'moving_platform', 
-        pos: [-8 + i * 4, 12 + i, 68 + i * 4], 
-        size: [2, 0.5, 2], 
-        color: '#DDA0DD',
-        moveType: 'horizontal',
-        moveRange: 4
-      });
-    }
-    
-    // Stage 4: Jump pads and speed (floors 7-8)
-    elements.push({ type: 'checkpoint', pos: [0, 18, 88], size: [2, 4, 0.5] });
-    elements.push({ type: 'jumppad', pos: [0, 19, 92], size: [2, 0.5, 2] });
-    elements.push({ type: 'platform', pos: [0, 25, 96], size: [3, 0.5, 3], color: '#90EE90' });
-    
-    // Speed pads section
+    // Central tower support columns (visual)
     for (let i = 0; i < 4; i++) {
-      elements.push({ type: 'speedpad', pos: [0, 26, 100 + i * 3], size: [2, 0.5, 2] });
-      // Add platforms between speed pads
-      if (i < 3) {
-        elements.push({ type: 'platform', pos: [0, 27, 101.5 + i * 3], size: [1.5, 0.5, 1.5], color: '#87CEEB' });
-      }
-    }
-    
-    // Stage 5: Spinning obstacles (floors 9-10)
-    elements.push({ type: 'checkpoint', pos: [0, 28, 116], size: [2, 4, 0.5] });
-    for (let i = 0; i < 3; i++) {
-      elements.push({ 
-        type: 'spinner', 
-        pos: [0, 30 + i * 3, 120 + i * 6], 
-        size: [8, 0.5, 1], 
-        color: '#FF6347',
-        spinSpeed: 0.02 + i * 0.01
-      });
-      elements.push({ 
-        type: 'platform', 
-        pos: [0, 30 + i * 3, 124 + i * 6], 
-        size: [2, 0.5, 2], 
-        color: '#90EE90' 
+      const angle = (i / 4) * Math.PI * 2;
+      const x = centerX + Math.cos(angle) * 4;
+      const z = centerZ + Math.sin(angle) * 4;
+      
+      elements.push({
+        type: 'platform',
+        pos: [x, 25, z],
+        size: [1, 50, 1],
+        color: '#696969'
       });
     }
     
-    // Final challenge: Mixed obstacles
-    elements.push({ type: 'checkpoint', pos: [0, 36, 136], size: [2, 4, 0.5] });
-    
-    // Final platform - Victory!
+    // Final victory platform at the top
+    const finalHeight = 2 + totalLevels * (heightPerLevel / levelsPerFloor) + 5;
     elements.push({ 
       type: 'platform', 
-      pos: [0, 40, 140], 
-      size: [6, 1, 6], 
+      pos: [0, finalHeight, 0], 
+      size: [8, 1, 8], 
       color: '#FFD700',
       material: 'victory'
     });
@@ -304,8 +341,8 @@ function ObbyEnvironment() {
     // Victory sign
     elements.push({ 
       type: 'platform', 
-      pos: [0, 45, 140], 
-      size: [8, 4, 0.5], 
+      pos: [0, finalHeight + 6, 0], 
+      size: [10, 4, 0.5], 
       color: '#8B4513',
       material: 'sign'
     });
