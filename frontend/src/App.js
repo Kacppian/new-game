@@ -65,11 +65,20 @@ function GameUI({ playerPosition, checkpointCount }) {
         <h3>🎯 Controls</h3>
         <div className="control-item">🔄 WASD / Arrow Keys - Move</div>
         <div className="control-item">🚀 Space - Jump</div>
-        <div className="control-item">🟢 Green - Checkpoints (Safe)</div>
-        <div className="control-item">🔴 Red - Kill Parts (Avoid!)</div>
-        <div className="control-item">🟡 Yellow - Jump Pads</div>
-        <div className="control-item">🔵 Blue - Speed Boosts</div>
-        <div className="control-item">🟠 Orange - Moving/Spinning</div>
+        <div className="control-section">
+          <div className="control-header">📷 Camera Controls:</div>
+          <div className="control-item">🔄 Q/E - Rotate Camera</div>
+          <div className="control-item">⬆️⬇️ R/T - Camera Height</div>
+          <div className="control-item">🔄 C - Reset Camera</div>
+        </div>
+        <div className="control-section">
+          <div className="control-header">🎮 Obby Elements:</div>
+          <div className="control-item">🟢 Green - Checkpoints (Safe)</div>
+          <div className="control-item">🔴 Red - Kill Parts (Avoid!)</div>
+          <div className="control-item">🟡 Yellow - Jump Pads</div>
+          <div className="control-item">🔵 Blue - Speed Boosts</div>
+          <div className="control-item">🟠 Orange - Moving/Spinning</div>
+        </div>
         <div className="goal">🏆 Goal: Reach the golden platform!</div>
       </div>
       
