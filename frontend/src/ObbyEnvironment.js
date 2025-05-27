@@ -361,26 +361,26 @@ function ObbyEnvironment() {
       
       {/* Welcome text */}
       <Text
-        position={[0, 6, -8]}
+        position={[0, 6, -6]}
         fontSize={1.5}
         color="white"
         anchorX="center"
         anchorY="middle"
         maxWidth={6}
       >
-        WELCOME TO{'\n'}ROBLOX OBBY{'\n'}TOWER CLIMB!
+        WELCOME TO{'\n'}ROBLOX TOWER{'\n'}CLIMB!
       </Text>
       
       {/* Victory text */}
       <Text
-        position={[0, 48, 140]}
+        position={[0, 20 + 5, 0]}
         fontSize={2}
         color="gold"
         anchorX="center"
         anchorY="middle"
         maxWidth={8}
       >
-        🎉 VICTORY! 🎉{'\n'}You completed{'\n'}the obby!
+        🎉 VICTORY! 🎉{'\n'}You reached{'\n'}the top!
       </Text>
       
       {/* Atmospheric elements */}
