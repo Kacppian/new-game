@@ -18,7 +18,7 @@ function RobloxCharacter({ position, onPositionChange, onCheckpointReached }) {
   const [velocity, setVelocity] = useState({ x: 0, y: 0, z: 0 });
   const [isGrounded, setIsGrounded] = useState(false);
   const [keys, setKeys] = useState({});
-  const [lastCheckpoint, setLastCheckpoint] = useState({ x: 0, y: 2, z: 0 });
+  const [lastCheckpoint, setLastCheckpoint] = useState({ x: 0, y: 1.25, z: 0 });
   const [currentCheckpoint, setCurrentCheckpoint] = useState(0);
   const [speedBoost, setSpeedBoost] = useState(1);
   const [speedBoostTimer, setSpeedBoostTimer] = useState(0);
