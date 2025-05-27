@@ -366,15 +366,11 @@ function RobloxCharacter({ position, onPositionChange, onCheckpointReached }) {
     const cameraHeight = 6;    // Lower height for better view
     const cameraSpeed = 0.08;  // Faster follow for responsiveness
     
-    // Apply manual camera offsets
-    const horizontalAngle = cameraOffset.horizontal;
-    const verticalOffset = cameraOffset.vertical;
-    
-    // Camera position relative to player with manual adjustments
+    // Fixed camera position relative to player
     const idealCameraPos = new THREE.Vector3(
-      newPos.x + Math.cos(horizontalAngle) * cameraDistance * 0.7,  // Adjustable horizontal position
-      newPos.y + cameraHeight + verticalOffset,                     // Adjustable height
-      newPos.z + Math.sin(horizontalAngle) * cameraDistance * 0.7   // Adjustable depth
+      newPos.x + cameraDistance * 0.7,  // Fixed horizontal position
+      newPos.y + cameraHeight,          // Fixed height
+      newPos.z + cameraDistance * 0.7   // Fixed depth
     );
     
     // Smooth camera movement with better responsiveness
