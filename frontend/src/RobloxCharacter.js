@@ -218,20 +218,20 @@ function RobloxCharacter({ position, onPositionChange, onCheckpointReached }) {
     // Get the camera's current horizontal rotation angle
     const cameraHorizontalAngle = cameraRotation.horizontal;
     
-    // Calculate where the camera is positioned relative to character
-    // Camera is at: character + (cos(angle), height, sin(angle)) * distance
-    // So camera forward (W) should move AWAY from camera position
+    // FIX: Camera forward should match camera positioning math
+    // Camera is positioned at: character + (sin(angle), height, cos(angle)) * distance
+    // So forward (away from camera) should use same sin/cos pattern
     const cameraForward = new THREE.Vector3(
-      -Math.cos(cameraHorizontalAngle),  // Opposite of camera X offset
+      -Math.sin(cameraHorizontalAngle),  // Match camera X positioning
       0,                                 // No Y movement
-      -Math.sin(cameraHorizontalAngle)   // Opposite of camera Z offset
+      -Math.cos(cameraHorizontalAngle)   // Match camera Z positioning
     ).normalize();
     
-    // Camera right is perpendicular to forward (90 degrees rotated)
+    // Camera right is perpendicular (90° rotation from forward)
     const cameraRight = new THREE.Vector3(
-      Math.sin(cameraHorizontalAngle),   // Perpendicular to forward X
+      -Math.cos(cameraHorizontalAngle),  // 90° from forward X
       0,                                 // No Y movement  
-      -Math.cos(cameraHorizontalAngle)   // Perpendicular to forward Z
+      Math.sin(cameraHorizontalAngle)    // 90° from forward Z
     ).normalize();
     
     // WASD movement relative to camera orientation
