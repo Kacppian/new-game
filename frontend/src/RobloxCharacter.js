@@ -199,80 +199,55 @@ function RobloxCharacter({ position, onPositionChange, onCheckpointReached }) {
     let newVelocity = { ...velocity };
     newVelocity.y += gravity * delta;
 
-    // Handle movement with two different control schemes
+    // Handle movement like typical Roblox games
     let isMoving = false;
     let moveVector = new THREE.Vector3(0, 0, 0);
+    let targetRotation = characterRotation;
     
-    // WASD - Camera relative movement
-    if (keys['KeyW'] || keys['KeyA'] || keys['KeyS'] || keys['KeyD']) {
-      // Calculate camera direction vectors
-      const horizontalAngle = cameraOffset.horizontal;
-      const cameraForward = new THREE.Vector3(
-        -Math.sin(horizontalAngle),  // Forward X component
-        0,                           // No Y movement for forward
-        -Math.cos(horizontalAngle)   // Forward Z component
-      ).normalize();
-      
-      const cameraRight = new THREE.Vector3(
-        Math.cos(horizontalAngle),   // Right X component
-        0,                           // No Y movement for right
-        -Math.sin(horizontalAngle)   // Right Z component
-      ).normalize();
-      
-      if (keys['KeyA']) {
-        moveVector.add(cameraRight.clone().multiplyScalar(-1)); // Move left relative to camera
-        isMoving = true;
-      }
-      if (keys['KeyD']) {
-        moveVector.add(cameraRight); // Move right relative to camera
-        isMoving = true;
-      }
-      if (keys['KeyW']) {
-        moveVector.add(cameraForward); // Move forward relative to camera
-        isMoving = true;
-      }
-      if (keys['KeyS']) {
-        moveVector.add(cameraForward.clone().multiplyScalar(-1)); // Move backward relative to camera
-        isMoving = true;
-      }
+    // WASD - World direction movement (like Roblox)
+    if (keys['KeyW'] || keys['ArrowUp']) {
+      moveVector.z = -1; // Forward (negative Z is forward in 3D)
+      targetRotation = 0; // Face forward
+      isMoving = true;
+    }
+    if (keys['KeyS'] || keys['ArrowDown']) {
+      moveVector.z = 1; // Backward
+      targetRotation = Math.PI; // Face backward
+      isMoving = true;
+    }
+    if (keys['KeyA'] || keys['ArrowLeft']) {
+      moveVector.x = -1; // Left
+      targetRotation = Math.PI / 2; // Face left
+      isMoving = true;
+    }
+    if (keys['KeyD'] || keys['ArrowRight']) {
+      moveVector.x = 1; // Right
+      targetRotation = -Math.PI / 2; // Face right
+      isMoving = true;
     }
     
-    // Arrow Keys - Character facing direction (world coordinates)
-    if (keys['ArrowLeft'] || keys['ArrowRight'] || keys['ArrowUp'] || keys['ArrowDown']) {
-      if (keys['ArrowLeft']) {
-        // Just turn character left, no movement
-        setCharacterRotation(prev => prev - 0.05);
-        isMoving = true;
-      }
-      if (keys['ArrowRight']) {
-        // Just turn character right, no movement  
-        setCharacterRotation(prev => prev + 0.05);
-        isMoving = true;
-      }
-      if (keys['ArrowUp']) {
-        // Move forward in character's current facing direction
-        const characterForward = new THREE.Vector3(
-          Math.sin(characterRotation),   // Forward X component
-          0,
-          Math.cos(characterRotation)    // Forward Z component  
-        ).normalize();
-        moveVector.add(characterForward);
-        isMoving = true;
-      }
-      if (keys['ArrowDown']) {
-        // Move backward from character's current facing direction
-        const characterForward = new THREE.Vector3(
-          Math.sin(characterRotation),   // Forward X component
-          0,
-          Math.cos(characterRotation)    // Forward Z component
-        ).normalize();
-        moveVector.add(characterForward.clone().multiplyScalar(-1));
-        isMoving = true;
-      }
-    }
-    
-    // Apply movement
+    // Handle diagonal movement and rotation
     if (moveVector.length() > 0) {
+      // For diagonal movement, calculate the angle
+      if (moveVector.x !== 0 && moveVector.z !== 0) {
+        targetRotation = Math.atan2(moveVector.x, -moveVector.z);
+      }
+      
+      // Smooth character rotation towards movement direction
+      const rotationDiff = targetRotation - characterRotation;
+      let shortestRotation = rotationDiff;
+      
+      // Handle rotation wrap-around (choose shortest path)
+      if (rotationDiff > Math.PI) {
+        shortestRotation = rotationDiff - 2 * Math.PI;
+      } else if (rotationDiff < -Math.PI) {
+        shortestRotation = rotationDiff + 2 * Math.PI;
+      }
+      
+      // Apply smooth rotation
+      setCharacterRotation(prev => prev + shortestRotation * 0.15);
+      
+      // Apply movement
       moveVector.normalize().multiplyScalar(moveSpeed);
       newVelocity.x = moveVector.x;
       newVelocity.z = moveVector.z;
