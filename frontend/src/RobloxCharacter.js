@@ -292,9 +292,9 @@ function RobloxCharacter({ position, onPositionChange, onCheckpointReached }) {
       z: currentPos.z + newVelocity.z * delta
     };
 
-    // Simple collision with ground/spawn platform for now
-    if (newPos.y <= 1) {
-      newPos.y = 1.25;
+    // Simple collision with spawn platform
+    if (newPos.y <= 0.75) { // Platform top (0.25) + character height (0.5) = 0.75
+      newPos.y = 0.75;
       newVelocity.y = Math.max(0, newVelocity.y);
       setIsGrounded(true);
     } else {
