@@ -239,17 +239,17 @@ function RobloxCharacter({ position, onPositionChange, onCheckpointReached }) {
     
     // Arrow Keys - Character facing direction (world coordinates)
     if (keys['ArrowLeft'] || keys['ArrowRight'] || keys['ArrowUp'] || keys['ArrowDown']) {
-      // Character forward direction (initially facing negative Z)
+      // Character forward direction (initially facing negative Z, which is "forward" in 3D space)
       const characterForward = new THREE.Vector3(
-        -Math.sin(characterRotation),
+        Math.sin(characterRotation),   // Forward X component (corrected)
         0,
-        -Math.cos(characterRotation)
+        Math.cos(characterRotation)    // Forward Z component (corrected)
       ).normalize();
       
       const characterRight = new THREE.Vector3(
-        Math.cos(characterRotation),
+        Math.cos(characterRotation),   // Right X component
         0,
-        -Math.sin(characterRotation)
+        -Math.sin(characterRotation)   // Right Z component
       ).normalize();
       
       if (keys['ArrowLeft']) {
