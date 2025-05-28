@@ -1,9 +1,173 @@
-import React, { useState, useEffect } from 'react';
-import { Canvas } from '@react-three/fiber';
-import { Environment, Stars } from '@react-three/drei';
+import React, { useState, useRef } from 'react';
+import { Canvas, useFrame } from '@react-three/fiber';
+import { OrbitControls, Stars, Environment, Box, Sphere, Cylinder } from '@react-three/drei';
 import RobloxCharacter from './RobloxCharacter';
 import ObbyEnvironment from './ObbyEnvironment';
 import './App.css';
+
+// Lego Skybox Component
+function LegoSkybox() {
+  return (
+    <mesh>
+      <sphereGeometry args={[500, 32, 32]} />
+      <meshBasicMaterial 
+        color="#87CEEB" 
+        side={2} // THREE.BackSide
+        transparent
+        opacity={0.8}
+      />
+    </mesh>
+  );
+}
+
+// Floating Lego Brick Component
+function FloatingLegoBrick({ position, color, size = [2, 1, 2], rotationSpeed = 0.01 }) {
+  const meshRef = useRef();
+  
+  useFrame(() => {
+    if (meshRef.current) {
+      meshRef.current.rotation.y += rotationSpeed;
+      meshRef.current.rotation.x += rotationSpeed * 0.5;
+    }
+  });
+
+  const [width, height, depth] = size;
+  const studSize = 0.3;
+  const studHeight = 0.15;
+  
+  // Generate stud positions
+  const generateStuds = () => {
+    const studs = [];
+    const studsX = Math.max(1, Math.floor(width / 2));
+    const studsZ = Math.max(1, Math.floor(depth / 2));
+    const spacingX = width / studsX;
+    const spacingZ = depth / studsZ;
+    const offsetX = -(width / 2) + (spacingX / 2);
+    const offsetZ = -(depth / 2) + (spacingZ / 2);
+    
+    for (let i = 0; i < studsX; i++) {
+      for (let j = 0; j < studsZ; j++) {
+        studs.push([
+          offsetX + i * spacingX,
+          height / 2 + studHeight / 2,
+          offsetZ + j * spacingZ
+        ]);
+      }
+    }
+    return studs;
+  };
+
+  const studPositions = generateStuds();
+
+  return (
+    <group ref={meshRef} position={position}>
+      {/* Main brick body */}
+      <Box args={size}>
+        <meshStandardMaterial 
+          color={color} 
+          roughness={0.2}
+          metalness={0.05}
+          transparent
+          opacity={0.6}
+        />
+      </Box>
+      
+      {/* Studs on top */}
+      {studPositions.map((studPos, index) => (
+        <Cylinder
+          key={index}
+          position={studPos}
+          args={[studSize, studSize, studHeight, 8]}
+        >
+          <meshStandardMaterial 
+            color={color} 
+            roughness={0.2}
+            metalness={0.05}
+            transparent
+            opacity={0.6}
+          />
+        </Cylinder>
+      ))}
+    </group>
+  );
+}
+
+// Lego Background Elements
+function LegoBackgroundElements() {
+  const brickColors = ['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#8E44AD', '#FFA500'];
+  
+  return (
+    <group>
+      {/* Floating Lego bricks in the background */}
+      {Array.from({ length: 20 }).map((_, i) => (
+        <FloatingLegoBrick
+          key={i}
+          position={[
+            (Math.random() - 0.5) * 200,
+            Math.random() * 100 + 50,
+            (Math.random() - 0.5) * 200
+          ]}
+          color={brickColors[Math.floor(Math.random() * brickColors.length)]}
+          size={[
+            Math.random() * 3 + 1,
+            Math.random() * 2 + 0.5,
+            Math.random() * 3 + 1
+          ]}
+          rotationSpeed={Math.random() * 0.02 + 0.005}
+        />
+      ))}
+      
+      {/* Large background Lego structures */}
+      <FloatingLegoBrick
+        position={[-80, 60, -100]}
+        color="#FF0000"
+        size={[8, 4, 8]}
+        rotationSpeed={0.005}
+      />
+      <FloatingLegoBrick
+        position={[80, 80, -120]}
+        color="#00AA00"
+        size={[6, 3, 6]}
+        rotationSpeed={-0.003}
+      />
+      <FloatingLegoBrick
+        position={[0, 120, -150]}
+        color="#0066FF"
+        size={[10, 2, 4]}
+        rotationSpeed={0.008}
+      />
+      
+      {/* Ground plane with Lego pattern */}
+      <mesh position={[0, -5, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[400, 400]} />
+        <meshStandardMaterial 
+          color="#90EE90" 
+          roughness={0.8}
+          metalness={0.1}
+        />
+      </mesh>
+      
+      {/* Distant Lego city skyline */}
+      {Array.from({ length: 8 }).map((_, i) => (
+        <FloatingLegoBrick
+          key={`city-${i}`}
+          position={[
+            (i - 4) * 25,
+            Math.random() * 30 + 20,
+            -200 - Math.random() * 50
+          ]}
+          color={brickColors[Math.floor(Math.random() * brickColors.length)]}
+          size={[
+            Math.random() * 6 + 4,
+            Math.random() * 20 + 10,
+            Math.random() * 6 + 4
+          ]}
+          rotationSpeed={0}
+        />
+      ))}
+    </group>
+  );
+}
 
 // Game UI component
 function GameUI({ playerPosition, checkpointCount }) {
