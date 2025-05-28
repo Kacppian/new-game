@@ -284,7 +284,11 @@ function App() {
           shadow-camera-top={30}
           shadow-camera-bottom={-30}
         />
-        <pointLight position={[0, 50, 0]} intensity={0.5} color="#ffffff" />
+        <pointLight position={[0, 50, 0]} intensity={0.7} color="#ffffff" />
+        {/* Additional atmospheric lighting for Lego world */}
+        <ambientLight intensity={0.4} color="#f0f8ff" />
+        <pointLight position={[-50, 30, -50]} intensity={0.3} color="#ff6b6b" />
+        <pointLight position={[50, 30, -50]} intensity={0.3} color="#4ecdc4" />
         
         {/* Lego-themed Sky and Environment */}
         <LegoSkybox />
