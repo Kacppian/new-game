@@ -55,9 +55,14 @@ function RobloxCharacter({ position, onPositionChange, onCheckpointReached }) {
         return; // Don't add to keys state
       }
       
-      // Only add WASD and Space to movement keys
+      // Only add WASD and Space to movement keys (prevent duplicates)
       if (['KeyW', 'KeyA', 'KeyS', 'KeyD', 'Space'].includes(event.code)) {
-        setKeys(prev => ({ ...prev, [event.code]: true }));
+        setKeys(prev => {
+          if (!prev[event.code]) {
+            return { ...prev, [event.code]: true };
+          }
+          return prev;
+        });
       }
     };
     
@@ -73,12 +78,13 @@ function RobloxCharacter({ position, onPositionChange, onCheckpointReached }) {
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('keyup', handleKeyUp);
+    // Use capture phase to ensure we get the events first
+    window.addEventListener('keydown', handleKeyDown, { capture: true });
+    window.addEventListener('keyup', handleKeyUp, { capture: true });
     
     return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('keyup', handleKeyUp);
+      window.removeEventListener('keydown', handleKeyDown, { capture: true });
+      window.removeEventListener('keyup', handleKeyUp, { capture: true });
     };
   }, []);
 
