@@ -96,24 +96,50 @@ function FloatingLegoBrick({ position, color, size = [2, 1, 2], rotationSpeed = 
 function LegoBackgroundElements() {
   const brickColors = ['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#8E44AD', '#FFA500'];
   
+  // Generate stable random values that don't change on each render
+  const [floatingBricks] = useState(() => 
+    Array.from({ length: 20 }).map((_, i) => ({
+      position: [
+        (Math.random() - 0.5) * 200,
+        Math.random() * 100 + 50,
+        (Math.random() - 0.5) * 200
+      ],
+      color: brickColors[Math.floor(Math.random() * brickColors.length)],
+      size: [
+        Math.random() * 3 + 1,
+        Math.random() * 2 + 0.5,
+        Math.random() * 3 + 1
+      ],
+      rotationSpeed: Math.random() * 0.02 + 0.005
+    }))
+  );
+
+  const [cityBricks] = useState(() =>
+    Array.from({ length: 8 }).map((_, i) => ({
+      position: [
+        (i - 4) * 25,
+        Math.random() * 30 + 20,
+        -200 - Math.random() * 50
+      ],
+      color: brickColors[Math.floor(Math.random() * brickColors.length)],
+      size: [
+        Math.random() * 6 + 4,
+        Math.random() * 20 + 10,
+        Math.random() * 6 + 4
+      ]
+    }))
+  );
+  
   return (
     <group>
       {/* Floating Lego bricks in the background */}
-      {Array.from({ length: 20 }).map((_, i) => (
+      {floatingBricks.map((brick, i) => (
         <FloatingLegoBrick
           key={i}
-          position={[
-            (Math.random() - 0.5) * 200,
-            Math.random() * 100 + 50,
-            (Math.random() - 0.5) * 200
-          ]}
-          color={brickColors[Math.floor(Math.random() * brickColors.length)]}
-          size={[
-            Math.random() * 3 + 1,
-            Math.random() * 2 + 0.5,
-            Math.random() * 3 + 1
-          ]}
-          rotationSpeed={Math.random() * 0.02 + 0.005}
+          position={brick.position}
+          color={brick.color}
+          size={brick.size}
+          rotationSpeed={brick.rotationSpeed}
         />
       ))}
       
@@ -148,20 +174,12 @@ function LegoBackgroundElements() {
       </mesh>
       
       {/* Distant Lego city skyline */}
-      {Array.from({ length: 8 }).map((_, i) => (
+      {cityBricks.map((brick, i) => (
         <FloatingLegoBrick
           key={`city-${i}`}
-          position={[
-            (i - 4) * 25,
-            Math.random() * 30 + 20,
-            -200 - Math.random() * 50
-          ]}
-          color={brickColors[Math.floor(Math.random() * brickColors.length)]}
-          size={[
-            Math.random() * 6 + 4,
-            Math.random() * 20 + 10,
-            Math.random() * 6 + 4
-          ]}
+          position={brick.position}
+          color={brick.color}
+          size={brick.size}
           rotationSpeed={0}
         />
       ))}
