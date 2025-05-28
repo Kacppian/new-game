@@ -4,10 +4,14 @@ import { Box, Cylinder, Text } from '@react-three/drei';
 import * as THREE from 'three';
 
 // Lego Block Component with studs
-function LegoBlock({ position, size, material, children }) {
+function LegoBlock({ position, size, material, children, onRef }) {
+  const groupRef = useRef();
   const [width, height, depth] = size;
   const studSize = 0.3;
   const studHeight = 0.15;
+  
+  // Forward ref to parent
+  React.useImperativeHandle(onRef, () => groupRef.current);
   
   // Calculate number of studs based on block size
   const studsX = Math.max(1, Math.floor(width / 2));
@@ -36,7 +40,7 @@ function LegoBlock({ position, size, material, children }) {
   const studPositions = generateStuds();
 
   return (
-    <group position={position}>
+    <group ref={groupRef} position={position}>
       {/* Main block body */}
       <Box
         args={size}
