@@ -72,6 +72,67 @@ function RobloxCharacter({ position, onPositionChange, onCheckpointReached }) {
     };
   }, []);
 
+  // Handle mouse controls for camera rotation
+  useEffect(() => {
+    const handleMouseDown = (event) => {
+      // Right mouse button enables mouse look
+      if (event.button === 2) {
+        setIsMouseLooking(true);
+        setLastMousePosition({ x: event.clientX, y: event.clientY });
+        // Request pointer lock for better mouse control
+        document.body.requestPointerLock && document.body.requestPointerLock();
+        event.preventDefault();
+      }
+    };
+
+    const handleMouseUp = (event) => {
+      if (event.button === 2) {
+        setIsMouseLooking(false);
+        // Exit pointer lock
+        document.exitPointerLock && document.exitPointerLock();
+      }
+    };
+
+    const handleMouseMove = (event) => {
+      if (!isMouseLooking) return;
+
+      // Use movementX/Y when pointer is locked, otherwise calculate delta
+      let deltaX, deltaY;
+      if (document.pointerLockElement) {
+        deltaX = event.movementX || 0;
+        deltaY = event.movementY || 0;
+      } else {
+        deltaX = event.clientX - lastMousePosition.x;
+        deltaY = event.clientY - lastMousePosition.y;
+        setLastMousePosition({ x: event.clientX, y: event.clientY });
+      }
+
+      const mouseSensitivity = 0.003; // Adjust this value to change mouse sensitivity
+      
+      setCameraRotation(prev => ({
+        horizontal: prev.horizontal + deltaX * mouseSensitivity,
+        vertical: Math.max(-1, Math.min(1, prev.vertical - deltaY * mouseSensitivity))
+      }));
+    };
+
+    const handleContextMenu = (event) => {
+      // Prevent right-click context menu when using mouse look
+      event.preventDefault();
+    };
+
+    window.addEventListener('mousedown', handleMouseDown);
+    window.addEventListener('mouseup', handleMouseUp);
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('contextmenu', handleContextMenu);
+    
+    return () => {
+      window.removeEventListener('mousedown', handleMouseDown);
+      window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('contextmenu', handleContextMenu);
+    };
+  }, [isMouseLooking, lastMousePosition]);
+
   // Obby elements with Roblox-style design
   const getObbyElements = () => {
     const elements = [];
