@@ -109,81 +109,83 @@ function ObbyElement({ element, time }) {
       case 'killpart':
         return (
           <meshStandardMaterial 
-            color="#FF4444" 
-            emissive="#330000"
-            roughness={0.3}
-            metalness={0.7}
+            color="#FF0000" 
+            emissive="#220000"
+            roughness={0.2}
+            metalness={0.1}
           />
         );
       case 'checkpoint':
         return (
           <meshStandardMaterial 
-            color="#00FF00" 
+            color="#00DD00" 
             emissive="#003300"
             transparent
-            opacity={0.8}
-            roughness={0.2}
+            opacity={0.9}
+            roughness={0.3}
+            metalness={0.1}
           />
         );
       case 'jumppad':
         return (
           <meshStandardMaterial 
             color="#FFFF00" 
-            emissive="#444400"
-            roughness={0.1}
-            metalness={0.5}
+            emissive="#333300"
+            roughness={0.2}
+            metalness={0.1}
           />
         );
       case 'speedpad':
         return (
           <meshStandardMaterial 
             color="#0088FF" 
-            emissive="#001144"
-            roughness={0.1}
-            metalness={0.3}
+            emissive="#001133"
+            roughness={0.2}
+            metalness={0.1}
           />
         );
       case 'moving_platform':
         return (
           <meshStandardMaterial 
-            color={element.color || "#DDA0DD"} 
+            color={element.color || "#FF6B35"} 
             roughness={0.3}
-            metalness={0.4}
+            metalness={0.1}
           />
         );
       case 'spinner':
         return (
           <meshStandardMaterial 
-            color={element.color || "#FF6347"} 
-            emissive="#220000"
+            color={element.color || "#FF4444"} 
+            emissive="#110000"
             roughness={0.2}
-            metalness={0.6}
+            metalness={0.1}
           />
         );
       default:
         if (element.material === 'spawn') {
           return (
             <meshStandardMaterial 
-              color="#90EE90" 
+              color="#55DD55" 
               emissive="#002200"
-              roughness={0.4}
+              roughness={0.3}
+              metalness={0.1}
             />
           );
         } else if (element.material === 'victory') {
           return (
             <meshStandardMaterial 
               color="#FFD700" 
-              emissive="#444400"
+              emissive="#333300"
               roughness={0.1}
-              metalness={0.8}
+              metalness={0.3}
             />
           );
         }
         return (
           <meshStandardMaterial 
-            color={element.color || "#87CEEB"} 
-            roughness={0.4}
-            metalness={0.2}
+            color={element.color || "#4A90E2"} 
+            roughness={0.3}
+            metalness={0.1}
           />
         );
     }
