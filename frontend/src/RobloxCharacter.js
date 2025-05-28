@@ -216,21 +216,36 @@ function RobloxCharacter({ position, onPositionChange, onCheckpointReached }) {
       elements.push({ type: 'speedpad', pos: [0, 26, 100 + i * 3], size: [2, 0.5, 2] });
     }
     
-    // Stage 5: Spinning obstacles (floors 9-10)
+    // Stage 5: Spinning obstacles (floors 9-10) - Enhanced with purple Lego elements
     elements.push({ type: 'checkpoint', pos: [0, 28, 116], size: [2, 4, 0.5] });
+    
+    // Add some purple support platforms before the spinners
+    elements.push({ 
+      type: 'platform', 
+      pos: [-4, 29, 118], 
+      size: [2, 1, 2], 
+      color: '#8E44AD' // Purple Lego platform
+    });
+    elements.push({ 
+      type: 'platform', 
+      pos: [4, 29, 118], 
+      size: [2, 1, 2], 
+      color: '#8E44AD' // Purple Lego platform
+    });
+    
     for (let i = 0; i < 3; i++) {
       elements.push({ 
         type: 'spinner', 
         pos: [0, 30 + i * 3, 120 + i * 6], 
-        size: [8, 0.5, 1], 
-        color: '#FF6347',
+        size: [8, 0.8, 1], // Made thicker for better Lego appearance
+        color: '#8E44AD', // Changed to purple to match theme
         spinSpeed: 0.02 + i * 0.01
       });
       elements.push({ 
         type: 'platform', 
         pos: [0, 30 + i * 3, 124 + i * 6], 
-        size: [2, 0.5, 2], 
-        color: '#90EE90' 
+        size: [3, 1, 3], // Made larger and thicker
+        color: '#8E44AD' // Purple Lego platforms
       });
     }
     
