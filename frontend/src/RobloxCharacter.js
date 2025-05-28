@@ -24,6 +24,8 @@ function RobloxCharacter({ position, onPositionChange, onCheckpointReached }) {
   const [speedBoostTimer, setSpeedBoostTimer] = useState(0);
   const [characterRotation, setCharacterRotation] = useState(0);
   const [cameraRotation, setCameraRotation] = useState({ horizontal: 0, vertical: 0 });
+  const [isMouseLooking, setIsMouseLooking] = useState(false);
+  const [lastMousePosition, setLastMousePosition] = useState({ x: 0, y: 0 });
 
 
 
