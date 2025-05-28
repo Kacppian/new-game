@@ -3,6 +3,66 @@ import { useFrame } from '@react-three/fiber';
 import { Box, Cylinder, Text } from '@react-three/drei';
 import * as THREE from 'three';
 
+// Lego Block Component with studs
+function LegoBlock({ position, size, material, children }) {
+  const [width, height, depth] = size;
+  const studSize = 0.3;
+  const studHeight = 0.15;
+  
+  // Calculate number of studs based on block size
+  const studsX = Math.max(1, Math.floor(width / 2));
+  const studsZ = Math.max(1, Math.floor(depth / 2));
+  
+  // Generate stud positions
+  const generateStuds = () => {
+    const studs = [];
+    const spacingX = width / studsX;
+    const spacingZ = depth / studsZ;
+    const offsetX = -(width / 2) + (spacingX / 2);
+    const offsetZ = -(depth / 2) + (spacingZ / 2);
+    
+    for (let i = 0; i < studsX; i++) {
+      for (let j = 0; j < studsZ; j++) {
+        studs.push([
+          offsetX + i * spacingX,
+          height / 2 + studHeight / 2,
+          offsetZ + j * spacingZ
+        ]);
+      }
+    }
+    return studs;
+  };
+
+  const studPositions = generateStuds();
+
+  return (
+    <group position={position}>
+      {/* Main block body */}
+      <Box
+        args={size}
+        castShadow
+        receiveShadow
+      >
+        {material}
+      </Box>
+      
+      {/* Studs on top */}
+      {studPositions.map((studPos, index) => (
+        <Cylinder
+          key={index}
+          position={studPos}
+          args={[studSize, studSize, studHeight, 8]}
+          castShadow
+        >
+          {material}
+        </Cylinder>
+      ))}
+      
+      {children}
+    </group>
+  );
+}
+
 // Individual Obby Element Component
 function ObbyElement({ element, time }) {
   const meshRef = useRef();
