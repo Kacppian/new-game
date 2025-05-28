@@ -122,20 +122,12 @@ function App() {
         />
         <pointLight position={[0, 50, 0]} intensity={0.5} color="#ffffff" />
         
-        {/* Sky and Environment */}
-        <Stars 
-          radius={300} 
-          depth={60} 
-          count={1000} 
-          factor={7} 
-          saturation={0.5} 
-          fade 
-          speed={1}
-        />
-        <Environment preset="sunset" />
+        {/* Lego-themed Sky and Environment */}
+        <LegoSkybox />
+        <LegoBackgroundElements />
         
-        {/* Fog for atmosphere */}
-        <fog attach="fog" args={['#87CEEB', 50, 200]} />
+        {/* Fog for atmosphere - Lego blue sky color */}
+        <fog attach="fog" args={['#4A90E2', 60, 250]} />
         
         {/* Game Elements */}
         <ObbyEnvironment />
