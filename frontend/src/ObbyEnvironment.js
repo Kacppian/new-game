@@ -187,52 +187,49 @@ function ObbyElement({ element, time }) {
 
   return (
     <group>
-      <Box
+      <LegoBlock
         ref={meshRef}
         position={element.pos}
-        args={element.size}
-        castShadow
-        receiveShadow
+        size={element.size}
+        material={getMaterial()}
       >
-        {getMaterial()}
-      </Box>
-      
-      {/* Add text labels for interactive elements */}
-      {element.type === 'checkpoint' && (
-        <Text
-          position={[element.pos[0], element.pos[1] + 3, element.pos[2]]}
-          fontSize={0.8}
-          color="white"
-          anchorX="center"
-          anchorY="middle"
-        >
-          CHECKPOINT
-        </Text>
-      )}
-      
-      {element.type === 'jumppad' && (
-        <Text
-          position={[element.pos[0], element.pos[1] + 1.5, element.pos[2]]}
-          fontSize={0.6}
-          color="black"
-          anchorX="center"
-          anchorY="middle"
-        >
-          JUMP PAD
-        </Text>
-      )}
-      
-      {element.type === 'speedpad' && (
-        <Text
-          position={[element.pos[0], element.pos[1] + 1.5, element.pos[2]]}
-          fontSize={0.6}
-          color="white"
-          anchorX="center"
-          anchorY="middle"
-        >
-          SPEED BOOST
-        </Text>
-      )}
+        {/* Add text labels for interactive elements */}
+        {element.type === 'checkpoint' && (
+          <Text
+            position={[0, element.size[1] / 2 + 3, 0]}
+            fontSize={0.8}
+            color="white"
+            anchorX="center"
+            anchorY="middle"
+          >
+            CHECKPOINT
+          </Text>
+        )}
+        
+        {element.type === 'jumppad' && (
+          <Text
+            position={[0, element.size[1] / 2 + 1.5, 0]}
+            fontSize={0.6}
+            color="black"
+            anchorX="center"
+            anchorY="middle"
+          >
+            JUMP PAD
+          </Text>
+        )}
+        
+        {element.type === 'speedpad' && (
+          <Text
+            position={[0, element.size[1] / 2 + 1.5, 0]}
+            fontSize={0.6}
+            color="white"
+            anchorX="center"
+            anchorY="middle"
+          >
+            SPEED BOOST
+          </Text>
+        )}
+      </LegoBlock>
     </group>
   );
 }
