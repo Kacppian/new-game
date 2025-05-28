@@ -61,31 +61,7 @@ function GameUI({ playerPosition, checkpointCount }) {
         </div>
       </div>
       
-      <div className="controls-panel roblox-style">
-        <h3>🎯 Controls</h3>
-        <div className="control-section">
-          <div className="control-header">🎮 Character Movement:</div>
-          <div className="control-item">🔄 WASD - Move relative to camera</div>
-          <div className="control-item">🚀 Space - Jump</div>
-          <div className="control-note">W = Forward from camera view!</div>
-        </div>
-        <div className="control-section">
-          <div className="control-header">📷 Camera Control:</div>
-          <div className="control-item">⬅️➡️ Left/Right Arrows - Rotate Camera</div>
-          <div className="control-item">⬆️⬇️ Up/Down Arrows - Camera Height</div>
-          <div className="control-item">🖱️ Right-click + Mouse - Look Around</div>
-          <div className="control-note">Hold right mouse button and move to look around!</div>
-        </div>
-        <div className="control-section">
-          <div className="control-header">🎮 Obby Elements:</div>
-          <div className="control-item">🟢 Green - Checkpoints (Safe)</div>
-          <div className="control-item">🔴 Red - Kill Parts (Avoid!)</div>
-          <div className="control-item">🟡 Yellow - Jump Pads</div>
-          <div className="control-item">🔵 Blue - Speed Boosts</div>
-          <div className="control-item">🟠 Orange - Moving/Spinning</div>
-        </div>
-        <div className="goal">🏆 Goal: Reach the golden platform!</div>
-      </div>
+
       
       {progress >= 100 && (
         <div className="victory-message">

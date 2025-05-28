@@ -451,7 +451,7 @@ function ObbyEnvironment() {
         anchorY="middle"
         maxWidth={6}
       >
-        WELCOME TO{'\n'}ROBLOX TOWER{'\n'}CLIMB!
+        WELCOME TO{'\n'}SEOK TOWER
       </Text>
       
       {/* Victory text */}
