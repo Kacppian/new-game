@@ -73,7 +73,8 @@ function GameUI({ playerPosition, checkpointCount }) {
           <div className="control-header">📷 Camera Control:</div>
           <div className="control-item">⬅️➡️ Left/Right Arrows - Rotate Camera</div>
           <div className="control-item">⬆️⬇️ Up/Down Arrows - Camera Height</div>
-          <div className="control-note">Traditional 3D game controls!</div>
+          <div className="control-item">🖱️ Right-click + Mouse - Look Around</div>
+          <div className="control-note">Hold right mouse button and move to look around!</div>
         </div>
         <div className="control-section">
           <div className="control-header">🎮 Obby Elements:</div>
