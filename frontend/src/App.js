@@ -61,7 +61,7 @@ function GameUI({ playerPosition, checkpointCount }) {
         </div>
       </div>
       
-      {/* <div className="controls-panel roblox-style">
+      <div className="controls-panel roblox-style">
         <h3>🎯 Controls</h3>
         <div className="control-section">
           <div className="control-header">🎮 Character Movement:</div>
@@ -85,7 +85,7 @@ function GameUI({ playerPosition, checkpointCount }) {
           <div className="control-item">🟠 Orange - Moving/Spinning</div>
         </div>
         <div className="goal">🏆 Goal: Reach the golden platform!</div>
-      </div> */}
+      </div>
       
       {progress >= 100 && (
         <div className="victory-message">
