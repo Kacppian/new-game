@@ -147,9 +147,10 @@ function ObbyElement({ element, time }) {
       case 'moving_platform':
         return (
           <meshStandardMaterial 
-            color={element.color || "#FF6B35"} 
-            roughness={0.3}
-            metalness={0.1}
+            color={element.color || "#8E44AD"} 
+            roughness={0.2}
+            metalness={0.05}
+            emissive="#220033"
           />
         );
       case 'spinner':
