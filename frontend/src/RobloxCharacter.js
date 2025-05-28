@@ -193,14 +193,14 @@ function RobloxCharacter({ position, onPositionChange, onCheckpointReached }) {
       elements.push({ type: 'platform', pos: [x, 9, 58], size: [1, 0.5, 1], color: '#87CEEB' });
     }
     
-    // Stage 3: Moving platforms (floors 5-6)
+    // Stage 3: Moving platforms (floors 5-6) - Enhanced Lego purple platforms
     elements.push({ type: 'checkpoint', pos: [0, 10, 64], size: [2, 4, 0.5] });
     for (let i = 0; i < 5; i++) {
       elements.push({ 
         type: 'moving_platform', 
         pos: [-8 + i * 4, 12 + i, 68 + i * 4], 
-        size: [2, 0.5, 2], 
-        color: '#DDA0DD',
+        size: [3, 1, 3], // Made them thicker and more substantial like Lego blocks
+        color: '#8E44AD', // More authentic Lego purple color
         moveType: 'horizontal',
         moveRange: 4
       });
