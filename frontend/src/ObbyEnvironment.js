@@ -185,8 +185,9 @@ function ObbyElement({ element, time }) {
         return (
           <meshStandardMaterial 
             color={element.color || "#4A90E2"} 
-            roughness={0.3}
-            metalness={0.1}
+            roughness={0.2}
+            metalness={0.05}
+            emissive={element.color === '#8E44AD' ? "#220033" : "#000000"}
           />
         );
     }
