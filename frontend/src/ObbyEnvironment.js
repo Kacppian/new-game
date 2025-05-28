@@ -192,7 +192,7 @@ function ObbyElement({ element, time }) {
   return (
     <group>
       <LegoBlock
-        ref={meshRef}
+        onRef={(ref) => { meshRef.current = ref; }}
         position={element.pos}
         size={element.size}
         material={getMaterial()}
