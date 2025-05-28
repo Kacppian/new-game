@@ -32,6 +32,11 @@ function RobloxCharacter({ position, onPositionChange, onCheckpointReached }) {
   // Handle keyboard input - Arrow keys for camera, WASD for movement
   useEffect(() => {
     const handleKeyDown = (event) => {
+      // Prevent default behavior for all game keys to avoid conflicts
+      if (['KeyW', 'KeyA', 'KeyS', 'KeyD', 'Space', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.code)) {
+        event.preventDefault();
+      }
+      
       // Arrow keys control camera rotation ONLY - don't add to movement keys
       if (event.code === 'ArrowLeft') {
         setCameraRotation(prev => ({ ...prev, horizontal: prev.horizontal - 0.1 }));
@@ -57,6 +62,11 @@ function RobloxCharacter({ position, onPositionChange, onCheckpointReached }) {
     };
     
     const handleKeyUp = (event) => {
+      // Prevent default behavior for all game keys
+      if (['KeyW', 'KeyA', 'KeyS', 'KeyD', 'Space', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.code)) {
+        event.preventDefault();
+      }
+      
       // Only remove WASD and Space from movement keys
       if (['KeyW', 'KeyA', 'KeyS', 'KeyD', 'Space'].includes(event.code)) {
         setKeys(prev => ({ ...prev, [event.code]: false }));
