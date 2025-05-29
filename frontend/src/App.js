@@ -278,25 +278,25 @@ function App() {
         frameloop="demand" // Only render when needed
         performance={{ min: 0.5 }} // Lower performance threshold
       >
-        {/* Lighting Setup */}
-        <ambientLight intensity={0.6} />
+        {/* Optimized Lighting Setup for Windows performance */}
+        <ambientLight intensity={0.7} /> {/* Increased ambient to reduce need for shadows */}
         <directionalLight
           position={[20, 30, 20]}
-          intensity={1}
-          castShadow
-          shadow-mapSize-width={2048}
-          shadow-mapSize-height={2048}
+          intensity={0.6} // Reduced intensity
+          castShadow={false} // Disable shadows for better performance
+          shadow-mapSize-width={512} // Reduced shadow quality
+          shadow-mapSize-height={512}
           shadow-camera-far={100}
           shadow-camera-left={-30}
           shadow-camera-right={30}
           shadow-camera-top={30}
           shadow-camera-bottom={-30}
         />
-        <pointLight position={[0, 50, 0]} intensity={0.7} color="#ffffff" />
-        {/* Additional atmospheric lighting for Lego world */}
-        <ambientLight intensity={0.4} color="#f0f8ff" />
-        <pointLight position={[-50, 30, -50]} intensity={0.3} color="#ff6b6b" />
-        <pointLight position={[50, 30, -50]} intensity={0.3} color="#4ecdc4" />
+        <pointLight position={[0, 50, 0]} intensity={0.5} color="#ffffff" castShadow={false} />
+        {/* Reduced atmospheric lighting for performance */}
+        <ambientLight intensity={0.3} color="#f0f8ff" />
+        <pointLight position={[-50, 30, -50]} intensity={0.2} color="#ff6b6b" castShadow={false} />
+        <pointLight position={[50, 30, -50]} intensity={0.2} color="#4ecdc4" castShadow={false} />
         
         {/* Lego-themed Sky and Environment */}
         <LegoSkybox />
