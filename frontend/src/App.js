@@ -20,40 +20,28 @@ function LegoSkybox() {
   );
 }
 
-// Floating Lego Brick Component
+// Optimized Floating Lego Brick - simpler geometry for performance
 function FloatingLegoBrick({ position, color, size = [2, 1, 2], rotationSpeed = 0.01 }) {
   const meshRef = useRef();
   
   useFrame(() => {
     if (meshRef.current) {
       meshRef.current.rotation.y += rotationSpeed;
-      meshRef.current.rotation.x += rotationSpeed * 0.5;
+      meshRef.current.rotation.x += rotationSpeed * 0.3; // Reduced rotation complexity
     }
   });
 
   const [width, height, depth] = size;
-  const studSize = 0.3;
-  const studHeight = 0.15;
   
-  // Generate stud positions
+  // Simplified studs - maximum 2 studs for performance
   const generateStuds = () => {
     const studs = [];
-    const studsX = Math.max(1, Math.floor(width / 2));
-    const studsZ = Math.max(1, Math.floor(depth / 2));
-    const spacingX = width / studsX;
-    const spacingZ = depth / studsZ;
-    const offsetX = -(width / 2) + (spacingX / 2);
-    const offsetZ = -(depth / 2) + (spacingZ / 2);
+    const maxStuds = 2; // Drastically reduced from complex calculations
     
-    for (let i = 0; i < studsX; i++) {
-      for (let j = 0; j < studsZ; j++) {
-        studs.push([
-          offsetX + i * spacingX,
-          height / 2 + studHeight / 2,
-          offsetZ + j * spacingZ
-        ]);
-      }
+    if (width >= 2 && depth >= 2) {
+      studs.push([0, height / 2 + 0.1, 0]); // Single central stud for small blocks
     }
+    
     return studs;
   };
 
@@ -61,30 +49,30 @@ function FloatingLegoBrick({ position, color, size = [2, 1, 2], rotationSpeed = 
 
   return (
     <group ref={meshRef} position={position}>
-      {/* Main brick body */}
+      {/* Simplified brick body */}
       <Box args={size}>
         <meshStandardMaterial 
           color={color} 
-          roughness={0.2}
-          metalness={0.05}
+          roughness={0.3}
+          metalness={0.1}
           transparent
-          opacity={0.6}
+          opacity={0.7}
         />
       </Box>
       
-      {/* Studs on top */}
+      {/* Minimal studs for performance */}
       {studPositions.map((studPos, index) => (
         <Cylinder
           key={index}
           position={studPos}
-          args={[studSize, studSize, studHeight, 8]}
+          args={[0.2, 0.2, 0.1, 4]} // Much simpler geometry - 4 sides instead of 8
         >
           <meshStandardMaterial 
             color={color} 
-            roughness={0.2}
-            metalness={0.05}
+            roughness={0.3}
+            metalness={0.1}
             transparent
-            opacity={0.6}
+            opacity={0.7}
           />
         </Cylinder>
       ))}
@@ -92,47 +80,48 @@ function FloatingLegoBrick({ position, color, size = [2, 1, 2], rotationSpeed = 
   );
 }
 
-// Lego Background Elements
+// Highly optimized background elements - dramatically reduced for Windows performance
 function LegoBackgroundElements() {
   const brickColors = ['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#8E44AD', '#FFA500'];
   
-  // Generate stable random values that don't change on each render
+  // Drastically reduced from 20 to 8 floating bricks for performance
   const [floatingBricks] = useState(() => 
-    Array.from({ length: 20 }).map((_, i) => ({
+    Array.from({ length: 8 }).map((_, i) => ({
       position: [
-        (Math.random() - 0.5) * 200,
-        Math.random() * 100 + 50,
-        (Math.random() - 0.5) * 200
+        (Math.random() - 0.5) * 150, // Reduced range
+        Math.random() * 60 + 40, // Reduced range
+        (Math.random() - 0.5) * 150 // Reduced range
       ],
       color: brickColors[Math.floor(Math.random() * brickColors.length)],
       size: [
-        Math.random() * 3 + 1,
-        Math.random() * 2 + 0.5,
-        Math.random() * 3 + 1
+        Math.random() * 2 + 1, // Smaller sizes
+        Math.random() * 1 + 0.5,
+        Math.random() * 2 + 1
       ],
-      rotationSpeed: Math.random() * 0.02 + 0.005
+      rotationSpeed: Math.random() * 0.01 + 0.002 // Slower rotation
     }))
   );
 
+  // Reduced city skyline from 8 to 4 elements
   const [cityBricks] = useState(() =>
-    Array.from({ length: 8 }).map((_, i) => ({
+    Array.from({ length: 4 }).map((_, i) => ({
       position: [
-        (i - 4) * 25,
-        Math.random() * 30 + 20,
-        -200 - Math.random() * 50
+        (i - 2) * 40, // Wider spacing
+        Math.random() * 20 + 15,
+        -150 - Math.random() * 30
       ],
       color: brickColors[Math.floor(Math.random() * brickColors.length)],
       size: [
-        Math.random() * 6 + 4,
-        Math.random() * 20 + 10,
-        Math.random() * 6 + 4
+        Math.random() * 4 + 3,
+        Math.random() * 15 + 8,
+        Math.random() * 4 + 3
       ]
     }))
   );
   
   return (
     <group>
-      {/* Floating Lego bricks in the background */}
+      {/* Reduced floating Lego bricks */}
       {floatingBricks.map((brick, i) => (
         <FloatingLegoBrick
           key={i}
@@ -143,37 +132,31 @@ function LegoBackgroundElements() {
         />
       ))}
       
-      {/* Large background Lego structures */}
+      {/* Reduced large background structures - only 2 instead of 3 */}
       <FloatingLegoBrick
-        position={[-80, 60, -100]}
+        position={[-60, 50, -80]}
         color="#FF0000"
-        size={[8, 4, 8]}
+        size={[6, 3, 6]}
+        rotationSpeed={0.003}
+      />
+      <FloatingLegoBrick
+        position={[60, 60, -100]}
+        color="#0066FF"
+        size={[8, 2, 4]}
         rotationSpeed={0.005}
       />
-      <FloatingLegoBrick
-        position={[80, 80, -120]}
-        color="#00AA00"
-        size={[6, 3, 6]}
-        rotationSpeed={-0.003}
-      />
-      <FloatingLegoBrick
-        position={[0, 120, -150]}
-        color="#0066FF"
-        size={[10, 2, 4]}
-        rotationSpeed={0.008}
-      />
       
-      {/* Ground plane with Lego pattern */}
+      {/* Simplified ground plane */}
       <mesh position={[0, -5, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[400, 400]} />
+        <planeGeometry args={[300, 300]} /> {/* Smaller ground plane */}
         <meshStandardMaterial 
           color="#90EE90" 
           roughness={0.8}
-          metalness={0.1}
+          metalness={0.05}
         />
       </mesh>
       
-      {/* Distant Lego city skyline */}
+      {/* Reduced city skyline */}
       {cityBricks.map((brick, i) => (
         <FloatingLegoBrick
           key={`city-${i}`}
