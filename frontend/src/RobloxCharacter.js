@@ -290,6 +290,9 @@ function RobloxCharacter({ position, onPositionChange, onCheckpointReached }) {
   useFrame((state, delta) => {
     if (!groupRef.current) return;
 
+    // Prevent physics tunneling at low frame rates
+    delta = Math.min(delta, 0.033); // Cap at 30 FPS equivalent (prevents fall-through)
+
     // Clamp delta to prevent physics tunneling at low frame rates
     delta = Math.min(delta, 0.033); // Cap at ~30 FPS equivalent
     
