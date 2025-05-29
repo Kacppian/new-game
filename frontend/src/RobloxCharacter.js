@@ -533,7 +533,7 @@ function RobloxCharacter({ position, onPositionChange, onCheckpointReached }) {
     // Smooth camera follow
     camera.position.lerp(idealCameraPos, cameraSpeed);
     camera.lookAt(newPos.x, newPos.y + 2, newPos.z);
-  });
+  };
 
   return (
     <group ref={groupRef} position={position} rotation={[0, characterRotation, 0]}>
