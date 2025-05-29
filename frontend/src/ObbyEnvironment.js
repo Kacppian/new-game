@@ -3,34 +3,40 @@ import { useFrame } from '@react-three/fiber';
 import { Box, Cylinder, Text } from '@react-three/drei';
 import * as THREE from 'three';
 
-// Lego Block Component with studs
+// Optimized Lego Block Component with fewer studs for better performance
 function LegoBlock({ position, size, material, children, onRef }) {
   const groupRef = useRef();
   const [width, height, depth] = size;
-  const studSize = 0.3;
-  const studHeight = 0.15;
   
   // Forward ref to parent
   React.useImperativeHandle(onRef, () => groupRef.current);
   
-  // Calculate number of studs based on block size
-  const studsX = Math.max(1, Math.floor(width / 2));
-  const studsZ = Math.max(1, Math.floor(depth / 2));
+  // Drastically reduce stud count for better performance
+  const maxStuds = 4; // Maximum studs to prevent lag
+  const studSize = 0.25;
+  const studHeight = 0.12;
   
-  // Generate stud positions
+  // Generate fewer, simpler studs
   const generateStuds = () => {
     const studs = [];
-    const spacingX = width / studsX;
-    const spacingZ = depth / studsZ;
-    const offsetX = -(width / 2) + (spacingX / 2);
-    const offsetZ = -(depth / 2) + (spacingZ / 2);
+    let studsX = Math.min(maxStuds, Math.max(1, Math.floor(width / 3))); // Fewer studs
+    let studsZ = Math.min(maxStuds, Math.max(1, Math.floor(depth / 3))); // Fewer studs
+    
+    // For very large blocks, limit to 2x2 stud pattern max
+    if (width > 4 || depth > 4) {
+      studsX = Math.min(2, studsX);
+      studsZ = Math.min(2, studsZ);
+    }
+    
+    const spacingX = width / (studsX + 1);
+    const spacingZ = depth / (studsZ + 1);
     
     for (let i = 0; i < studsX; i++) {
       for (let j = 0; j < studsZ; j++) {
         studs.push([
-          offsetX + i * spacingX,
+          -width/2 + (i + 1) * spacingX,
           height / 2 + studHeight / 2,
-          offsetZ + j * spacingZ
+          -depth/2 + (j + 1) * spacingZ
         ]);
       }
     }
@@ -50,12 +56,12 @@ function LegoBlock({ position, size, material, children, onRef }) {
         {material}
       </Box>
       
-      {/* Studs on top */}
+      {/* Simplified studs - fewer geometry for performance */}
       {studPositions.map((studPos, index) => (
         <Cylinder
           key={index}
           position={studPos}
-          args={[studSize, studSize, studHeight, 8]}
+          args={[studSize, studSize, studHeight, 6]} // Reduced geometry from 8 to 6 sides
           castShadow
         >
           {material}
