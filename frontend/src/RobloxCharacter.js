@@ -123,7 +123,7 @@ function RobloxCharacter({ position, onPositionChange, onCheckpointReached }) {
         setLastMousePosition({ x: event.clientX, y: event.clientY });
       }
 
-      const mouseSensitivity = 0.003; // Adjust this value to change mouse sensitivity
+      const mouseSensitivity = 0.008; // Increased sensitivity for more responsive mouse controls
       
       setCameraRotation(prev => ({
         horizontal: prev.horizontal + deltaX * mouseSensitivity,
