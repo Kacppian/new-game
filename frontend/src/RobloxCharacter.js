@@ -291,38 +291,8 @@ function RobloxCharacter({ position, onPositionChange, onCheckpointReached }) {
     if (!groupRef.current) return;
 
     // Prevent physics tunneling at low frame rates
-    delta = Math.min(delta, 0.033); // Cap at 30 FPS equivalent (prevents fall-through)
-
-    // Clamp delta to prevent physics tunneling at low frame rates
-    delta = Math.min(delta, 0.033); // Cap at ~30 FPS equivalent
-    
-    // Clamp delta to prevent physics tunneling at low frame rates
-    const clampedDelta = Math.min(delta, 0.033); // Cap at ~30 FPS equivalent
     const maxDelta = 0.05; // Emergency cap at 20 FPS equivalent
-    
-    // If frame rate is extremely low, use sub-stepping
-    const actualDelta = delta > maxDelta ? maxDelta : clampedDelta;
-    const subSteps = delta > maxDelta ? Math.ceil(delta / maxDelta) : 1;
-    const stepDelta = actualDelta / subSteps;
-    
-    // Perform physics in sub-steps to prevent tunneling
-    const performPhysicsStep = (dt) => {
-    
-    // Clamp delta to prevent physics tunneling at low frame rates
     const clampedDelta = Math.min(delta, 0.033); // Cap at ~30 FPS equivalent
-    const maxDelta = 0.05; // Emergency cap at 20 FPS equivalent
-    
-    // If frame rate is extremely low, use sub-stepping
-    const actualDelta = delta > maxDelta ? maxDelta : clampedDelta;
-    const subSteps = delta > maxDelta ? Math.ceil(delta / maxDelta) : 1;
-    const stepDelta = actualDelta / subSteps;
-    
-    // Perform physics in sub-steps to prevent tunneling
-    const performPhysicsStep = (stepDelta) => {
-    
-    // Clamp delta to prevent physics tunneling at low frame rates
-    const clampedDelta = Math.min(delta, 0.033); // Cap at ~30 FPS equivalent
-    const maxDelta = 0.05; // Emergency cap at 20 FPS equivalent
     
     // If frame rate is extremely low, use sub-stepping
     const actualDelta = delta > maxDelta ? maxDelta : clampedDelta;
@@ -336,7 +306,6 @@ function RobloxCharacter({ position, onPositionChange, onCheckpointReached }) {
   });
 
   const performPhysicsStep = (delta) => {
-
     const baseSpeed = 12;
     const moveSpeed = baseSpeed * speedBoost;
     const jumpForce = 18;
