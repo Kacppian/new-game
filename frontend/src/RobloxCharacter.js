@@ -386,23 +386,23 @@ function RobloxCharacter({ position, onPositionChange, onCheckpointReached }) {
       z: currentPos.z + newVelocity.z * delta
     };
 
-    // Improved platform collision detection - more robust for cross-platform
+    // Fixed platform collision detection - restored working values
     let onPlatform = false;
-    const tolerance = 0.2; // Increased tolerance for Windows compatibility
-    const verticalTolerance = 0.15;
+    const tolerance = 0.3; // Conservative tolerance that works cross-platform
+    const verticalTolerance = 0.1;
     
     // Check collision with spawn platform first
     const spawnPlatform = { pos: [0, 0, 0], size: [6, 0.5, 6], type: 'platform' };
     const playerBottom = newPos.y - 0.5;
     
-    // More robust spawn platform collision with better tolerances
+    // Spawn platform collision with working tolerances
     if (playerBottom <= spawnPlatform.pos[1] + spawnPlatform.size[1]/2 + verticalTolerance && 
-        playerBottom >= spawnPlatform.pos[1] - spawnPlatform.size[1]/2 - 0.8) {
+        playerBottom >= spawnPlatform.pos[1] - spawnPlatform.size[1]/2 - 0.5) {
       
       const isOnSpawn = Math.abs(newPos.x - spawnPlatform.pos[0]) <= spawnPlatform.size[0]/2 + tolerance && 
                        Math.abs(newPos.z - spawnPlatform.pos[2]) <= spawnPlatform.size[2]/2 + tolerance;
       
-      if (isOnSpawn && newVelocity.y <= 0.2) {
+      if (isOnSpawn && newVelocity.y <= 0.1) {
         newPos.y = spawnPlatform.pos[1] + spawnPlatform.size[1]/2 + 0.5;
         newVelocity.y = Math.max(0, newVelocity.y);
         onPlatform = true;
@@ -410,15 +410,15 @@ function RobloxCharacter({ position, onPositionChange, onCheckpointReached }) {
       }
     }
     
-    // Optimized collision detection - check fewer platforms based on player position
+    // Check collision with spiral tower platforms
     if (!onPlatform) {
       const centerX = 0, centerZ = 0, baseRadius = 8, totalLevels = 50;
       const heightIncrement = 0.8, platformsPerRotation = 12;
       
       // Only check platforms near the player's height for better performance
       const playerHeight = newPos.y;
-      const startLevel = Math.max(0, Math.floor((playerHeight - 5) / heightIncrement));
-      const endLevel = Math.min(totalLevels, Math.floor((playerHeight + 5) / heightIncrement) + 1);
+      const startLevel = Math.max(0, Math.floor((playerHeight - 3) / heightIncrement));
+      const endLevel = Math.min(totalLevels, Math.floor((playerHeight + 3) / heightIncrement) + 1);
       
       for (let level = startLevel; level < endLevel; level++) {
         const angle = (level / platformsPerRotation) * Math.PI * 2;
@@ -434,14 +434,14 @@ function RobloxCharacter({ position, onPositionChange, onCheckpointReached }) {
         else if (height < 30) platformSize = [2, 0.5, 2];
         else platformSize = [1.8, 0.5, 1.8];
         
-        // More robust platform collision check
+        // Platform collision check with working values
         if (playerBottom <= height + platformSize[1]/2 + verticalTolerance && 
-            playerBottom >= height - platformSize[1]/2 - 0.8) {
+            playerBottom >= height - platformSize[1]/2 - 0.5) {
           
           const isOnPlatform = Math.abs(newPos.x - x) <= platformSize[0]/2 + tolerance && 
                               Math.abs(newPos.z - z) <= platformSize[2]/2 + tolerance;
           
-          if (isOnPlatform && newVelocity.y <= 0.2) {
+          if (isOnPlatform && newVelocity.y <= 0.1) {
             newPos.y = height + platformSize[1]/2 + 0.5;
             newVelocity.y = Math.max(0, newVelocity.y);
             onPlatform = true;
@@ -450,8 +450,8 @@ function RobloxCharacter({ position, onPositionChange, onCheckpointReached }) {
           }
         }
         
-        // Check bridge platforms (only if close to player)
-        if (level % 4 === 1 && level > 0 && Math.abs(height - playerHeight) < 3) {
+        // Check bridge platforms
+        if (level % 4 === 1 && level > 0) {
           const prevAngle = ((level - 1) / platformsPerRotation) * Math.PI * 2;
           const prevX = centerX + Math.cos(prevAngle) * radius;
           const prevZ = centerZ + Math.sin(prevAngle) * radius;
@@ -463,12 +463,12 @@ function RobloxCharacter({ position, onPositionChange, onCheckpointReached }) {
           const bridgeSize = [1.5, 0.5, 1.5];
           
           if (playerBottom <= bridgeHeight + bridgeSize[1]/2 + verticalTolerance && 
-              playerBottom >= bridgeHeight - bridgeSize[1]/2 - 0.8) {
+              playerBottom >= bridgeHeight - bridgeSize[1]/2 - 0.5) {
             
             const isOnBridge = Math.abs(newPos.x - bridgeX) <= bridgeSize[0]/2 + tolerance && 
                               Math.abs(newPos.z - bridgeZ) <= bridgeSize[2]/2 + tolerance;
             
-            if (isOnBridge && newVelocity.y <= 0.2) {
+            if (isOnBridge && newVelocity.y <= 0.1) {
               newPos.y = bridgeHeight + bridgeSize[1]/2 + 0.5;
               newVelocity.y = Math.max(0, newVelocity.y);
               onPlatform = true;
