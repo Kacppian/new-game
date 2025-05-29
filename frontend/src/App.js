@@ -277,13 +277,7 @@ function App() {
         }}
         frameloop="demand" // Only render when needed
         performance={{ min: 0.5 }} // Lower performance threshold
-        gl={{ 
-          antialias: false, // Disable antialiasing for better performance on Windows
-          powerPreference: "high-performance",
-          alpha: false
-        }}
-        frameloop="demand" // Only render when needed
-        performance={{ min: 0.5 }} // Lower performance threshold
+      >
         {/* Lighting Setup */}
         <ambientLight intensity={0.6} />
         <directionalLight
