@@ -270,13 +270,6 @@ function App() {
         }}
         shadows
         style={{ height: '100vh', width: '100vw' }}
-        gl={{ 
-          antialias: false, // Disable antialiasing for better performance on Windows
-          powerPreference: "high-performance",
-          alpha: false
-        }}
-        frameloop="demand" // Only render when needed
-        performance={{ min: 0.5 }} // Lower performance threshold
       >
         {/* Optimized Lighting Setup for Windows performance */}
         <ambientLight intensity={0.7} /> {/* Increased ambient to reduce need for shadows */}
