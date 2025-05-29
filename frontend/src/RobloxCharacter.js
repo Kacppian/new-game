@@ -289,6 +289,23 @@ function RobloxCharacter({ position, onPositionChange, onCheckpointReached }) {
   // Physics and movement
   useFrame((state, delta) => {
     if (!groupRef.current) return;
+    
+    // Clamp delta to prevent physics tunneling at low frame rates
+    const clampedDelta = Math.min(delta, 0.033); // Cap at ~30 FPS equivalent
+    const maxDelta = 0.05; // Emergency cap at 20 FPS equivalent
+    
+    // If frame rate is extremely low, use sub-stepping
+    const actualDelta = delta > maxDelta ? maxDelta : clampedDelta;
+    const subSteps = delta > maxDelta ? Math.ceil(delta / maxDelta) : 1;
+    const stepDelta = actualDelta / subSteps;
+    
+    // Perform physics in sub-steps to prevent tunneling
+    for (let step = 0; step < subSteps; step++) {
+      performPhysicsStep(stepDelta);
+    }
+  });
+
+  const performPhysicsStep = (delta) => {
 
     const baseSpeed = 12;
     const moveSpeed = baseSpeed * speedBoost;
